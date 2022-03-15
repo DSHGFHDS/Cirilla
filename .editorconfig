@@ -1,0 +1,4 @@
+﻿[*.cs]
+
+# CS0108: 成员隐藏继承的成员；缺少关键字 new
+dotnet_diagnostic.CS0108.severity = error
