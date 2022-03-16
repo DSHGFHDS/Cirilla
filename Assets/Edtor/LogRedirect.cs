@@ -39,9 +39,13 @@ namespace Cirilla
         [OnOpenAssetAttribute(0)]
         public static bool OnOpenAsset(int instanceID, int line)
         {
-            string[] buffer = GetSelectedStackTrace().Split(CiriDebugger.logID + "\n");
+            string trace = GetSelectedStackTrace();
+            if (trace == null)
+                return false;
 
-            if (buffer == null || buffer.Length < 2)
+            string[] buffer = trace.Split(CiriDebugger.logID + "\n");
+
+            if (buffer.Length < 2)
                 return false;
 
             buffer = buffer[1].Split("\n");
