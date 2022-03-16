@@ -12,40 +12,26 @@ namespace Cirilla
         {
             Assembly editorWindowAssembly = typeof(EditorWindow).Assembly;
             if (editorWindowAssembly == null)
-            {
                 return null;
-            }
 
             System.Type consoleWindowType = editorWindowAssembly.GetType("UnityEditor.ConsoleWindow");
             if (consoleWindowType == null)
-            {
                 return null;
-            }
 
-            FieldInfo consoleWindowFieldInfo =
-                consoleWindowType.GetField("ms_ConsoleWindow", BindingFlags.Static | BindingFlags.NonPublic);
+            FieldInfo consoleWindowFieldInfo = consoleWindowType.GetField("ms_ConsoleWindow", BindingFlags.Static | BindingFlags.NonPublic);
             if (consoleWindowFieldInfo == null)
-            {
                 return null;
-            }
 
             EditorWindow consoleWindow = consoleWindowFieldInfo.GetValue(null) as EditorWindow;
             if (consoleWindow == null)
-            {
                 return null;
-            }
 
             if (consoleWindow != EditorWindow.focusedWindow)
-            {
                 return null;
-            }
 
-            FieldInfo activeTextFieldInfo =
-                consoleWindowType.GetField("m_ActiveText", BindingFlags.Instance | BindingFlags.NonPublic);
+            FieldInfo activeTextFieldInfo = consoleWindowType.GetField("m_ActiveText", BindingFlags.Instance | BindingFlags.NonPublic);
             if (activeTextFieldInfo == null)
-            {
                 return null;
-            }
 
             return (string)activeTextFieldInfo.GetValue(consoleWindow);
         }
@@ -55,7 +41,7 @@ namespace Cirilla
         {
             string[] buffer = GetSelectedStackTrace().Split(CiriDebugger.logID + "\n");
 
-            if (buffer.Length < 2)
+            if (buffer == null || buffer.Length < 2)
                 return false;
 
             buffer = buffer[1].Split("\n");
