@@ -206,7 +206,7 @@ namespace Cirilla
             abStock.Remove(packageName);
         }
 
-        public void ClearAssets()
+        public void Clear()
         {
             abStock.Clear();
             assetStock.Clear();

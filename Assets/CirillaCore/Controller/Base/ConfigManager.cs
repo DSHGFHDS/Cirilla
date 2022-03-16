@@ -5,11 +5,28 @@ namespace Cirilla
 {
     public class ConfigManager : ASingletonBase<ConfigManager>
     {
-        public const string congfigSetting = "Setting";
         private Dictionary<string, Dictionary<string, object>> configStock;
-        private ConfigManager()
-        {
+        private Dictionary<string, object> globalData;
+        private ConfigManager(){
             configStock = new Dictionary<string, Dictionary<string, object>>();
+        }
+        
+        public object this[string key]
+        {
+            get
+            {
+                if (globalData == null)
+                {
+                    globalData = new Dictionary<string, object>();
+                    foreach (ConfigKV kv in ASingletonEntity.goInstance.GetComponent<GlobalData>().kvBuffer)
+                        globalData.Add(kv.key, kv.GetValue());
+                }
+
+                if (!globalData.TryGetValue(key, out object obj))
+                    return null;
+
+                return obj;
+            }
         }
 
         public object this[string configName, string key]
@@ -17,14 +34,7 @@ namespace Cirilla
             get
             {
                 if (!configStock.TryGetValue(configName, out Dictionary<string, object> config))
-                {
-                    if(configName == congfigSetting)
-                    {
-                        LoadConfig(congfigSetting);
-                        return configStock[congfigSetting][key];
-                    }
                     return null;
-                }
 
                 if (!config.TryGetValue(key, out object obj))
                     return null;
@@ -33,8 +43,7 @@ namespace Cirilla
             }
         }
 
-
-        public void LoadConfig(ConfigData configAsset)
+        public void Load(ConfigData configAsset)
         {
             if (configStock.ContainsKey(configAsset.name))
                 return;
@@ -45,31 +54,31 @@ namespace Cirilla
                 configStock[configAsset.name].Add(kv.key, kv.GetValue());
         }
 
-        public void LoadConfig(string packageName, string configName)
+        public void Load(string packageName, string configName)
         {
             ResManager.instance.LoadPackage(packageName);
             ConfigData config = ResManager.instance.LoadAsset<ConfigData>(packageName, configName);
             if (config == null)
                 return;
 
-            LoadConfig(config);
+            Load(config);
         }
 
-        public void LoadConfig(string resourcePath)
+        public void Load(string resourcePath)
         {
             ConfigData config = ResManager.instance.LoadAsset<ConfigData>(resourcePath);
             if (config == null)
                 return;
 
-            LoadConfig(config);
+            Load(config);
         }
         
-        public void UnloadConfig(string configName)
+        public void Unload(string configName)
         {
             configStock.Remove(configName);
         }
 
-        public void ClearConfig()
+        public void Clear()
         {
             configStock.Clear();
         }

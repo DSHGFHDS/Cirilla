@@ -1,4 +1,6 @@
 ﻿
+using System;
+
 namespace Cirilla
 {
     public class ObserverManager<T> : ASingletonBase<ObserverManager<T>>, IObserver<T> where T : struct
@@ -13,12 +15,12 @@ namespace Cirilla
             observer.Add(type, callBack);
         }
 
-        public virtual void Clear()
+        [Obsolete("没有必要清空全局订阅器，请慎重检查")]
+        public void Clear()
         {
-            CiriDebugger.LogError("不建议清空全局订阅器");
             observer.Clear();
         }
-
+        
         public void Dispatch(T type, params object[] args)
         {
             observer.Dispatch(type, args);

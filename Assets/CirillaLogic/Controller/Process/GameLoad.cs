@@ -17,8 +17,6 @@ namespace Cirilla
 
         public override void OnLogicUpdatePre()
         {
-            ProcessManager.instance.ProcessGC();
-            ProcessManager.instance.AppQuit();
         }
 
         public override void OnLogicUpdatePost()

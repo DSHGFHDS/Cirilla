@@ -1,6 +1,7 @@
 ﻿
 using System;
 using System.Collections.Generic;
+using System.Reflection;
 using UnityEngine;
 
 namespace Cirilla
@@ -19,9 +20,31 @@ namespace Cirilla
             observer = ObserverManager<FSMEvent>.instance;
             observer.Add(FSMEvent.Change, ChangeCallback);
             processStock = new Dictionary<Type, AProcessBase>();
-            Type type = (ConfigManager.instance[ConfigManager.congfigSetting, "Entrance"] as UnityEditor.MonoScript).GetClass();
-            Add(type);
-            Change(type);
+            TextAsset textAsset = ConfigManager.instance["Entrance"] as TextAsset;
+
+            if(textAsset == null)
+            {
+                CiriDebugger.Log("GameLoadProcess is null");
+                return;
+            }
+
+            Type gameLoadType = null;
+            foreach (Assembly assembly in AppDomain.CurrentDomain.GetAssemblies())
+            {
+                foreach(Type type in assembly.GetTypes())
+                {
+                    if (type.Name != textAsset.name)
+                        continue;
+                    gameLoadType = type;
+                    break;
+                }
+            }
+
+            if(gameLoadType == null)
+                return;
+
+            Add(gameLoadType);
+            Change(gameLoadType);
         }
 
         private void Add(Type type)
@@ -115,7 +138,6 @@ namespace Cirilla
 
         public virtual void Clear()
         {
-            CiriDebugger.LogWarning("不建议清空流程");
             foreach(Type type in processStock.Keys) {
                 Component process = goInstance.GetComponent(type);
                 if (process == null)
@@ -130,8 +152,8 @@ namespace Cirilla
         public void ProcessGC()
         {
             GoManager.instance.Clear();
-            ConfigManager.instance.ClearConfig();
-            ResManager.instance.ClearAssets();
+            ConfigManager.instance.Clear();
+            ResManager.instance.Clear();
         }
 
         public void AppQuit()

@@ -1,13 +1,14 @@
 ﻿
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace Cirilla
 {
     public class ASingletonEntity : MonoBehaviour
     {
-        private const string gameEntname = "GameEntity";
+        public const string gameEntname = "GameEntity";
         private static GameObject go;
-        protected static GameObject goInstance
+        public static GameObject goInstance
         {
             get
             {
