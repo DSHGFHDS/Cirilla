@@ -67,7 +67,9 @@ namespace Cirilla
                         kv.SetValue(EditorGUILayout.TextField(kv.GetValue().ToString()));
                         break;
                     case ConfigDataType.Object:
+#pragma warning disable 0618
                         kv.SetValue(EditorGUILayout.ObjectField((Object)kv.GetValue(), typeof(Object)));
+#pragma warning restore 0618
                         break;
                     case ConfigDataType.Color:
                         kv.SetValue(EditorGUILayout.ColorField((Color)kv.GetValue()));
