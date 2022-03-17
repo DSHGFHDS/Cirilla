@@ -42,6 +42,32 @@ namespace Cirilla
                 return obj;
             }
         }
+        
+        public T GetValue<T>(string key)
+        {
+            if (globalData == null)
+            {
+                globalData = new Dictionary<string, object>();
+                foreach (ConfigKV kv in ASingletonEntity.goInstance.GetComponent<GlobalData>().kvBuffer)
+                    globalData.Add(kv.key, kv.GetValue());
+            }
+
+            if (!globalData.TryGetValue(key, out object obj))
+                return default(T);
+
+            return (T)obj;
+        }
+
+        public T GetValue<T>(string configName, string key)
+        {
+            if (!configStock.TryGetValue(configName, out Dictionary<string, object> config))
+                return default(T);
+
+            if (!config.TryGetValue(key, out object obj))
+                return default(T);
+
+            return (T)obj;
+        }
 
         public void Load(ConfigData configAsset)
         {

@@ -5,14 +5,15 @@ using System.Threading.Tasks;
 
 namespace Cirilla
 {
-    public abstract class ANetTcpBase: ITCP
+    public abstract class ASocketBase: INet
     {
-        private string ip;
-        private int port;
-        private int bufferLen;
+        public string ip { get; private set; }
+        public int port { get; private set; }
+        public int bufferLen;
+
         private Socket socket;
         private ObserverManager<NetEvent> observer;
-        protected ANetTcpBase(string ip, int port, int bufferLen)
+        protected ASocketBase(string ip, int port, int bufferLen)
         {
             this.ip = ip;
             this.port = port;
@@ -47,9 +48,9 @@ namespace Cirilla
 
                 try
                 {
-                    byte[] BTBuffer = new byte[bufferLen];
-                    while (socket.Receive(BTBuffer) > 0) {
-                        observer.Dispatch(NetEvent.Received, BTBuffer);
+                    byte[] buffer = new byte[bufferLen];
+                    while (socket.Receive(buffer) > 0) {
+                        observer.Dispatch(NetEvent.ReceiveByte, buffer);
                     }
                 }
                 catch {
@@ -60,7 +61,7 @@ namespace Cirilla
             );
         }
 
-        public void Disconnect(byte[] notice)
+        public void Disconnect()
         {
             if (socket == null)
             {
@@ -68,13 +69,12 @@ namespace Cirilla
                 return;
             }
 
-            Send(notice);
             Close();
         }
 
         public bool Send(byte[] netPackge)
         {
-            if (socket == null)
+            if (socket == null || netPackge == null)
             {
                 CiriDebugger.LogWarning("Send failed");
                 return false;
