@@ -2,6 +2,7 @@
 
 namespace Cirilla
 {
+    [AddComponentMenu("Cirilla/Broadcast/ParticleBroadcast")]
     public class ParticleBroadcast : MonoBehaviour
     {
         private IObserver observer;

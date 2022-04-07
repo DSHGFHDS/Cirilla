@@ -1,7 +1,7 @@
 ﻿
 namespace Cirilla
 {
-    public interface IDataPanel
+    public interface IScriptableData
     {
         T GetValue<T>(string globalKey, int index = 0);
         T GetValue<T>(string configName, string key, int index = 0);

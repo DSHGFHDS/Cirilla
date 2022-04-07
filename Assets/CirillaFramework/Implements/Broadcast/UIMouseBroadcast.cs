@@ -4,7 +4,7 @@ using UnityEngine.EventSystems;
 
 namespace Cirilla
 {
-	[AddComponentMenu("DCiri/Broadcast/UIMouseBroadcast")]
+	[AddComponentMenu("Cirilla/Broadcast/UIMouseBroadcast")]
 	public class UIMouseBroadcast : MonoBehaviour, IPointerClickHandler, IPointerEnterHandler, IPointerExitHandler, IPointerDownHandler, IDragHandler
 	{
 		private IObserver observer;

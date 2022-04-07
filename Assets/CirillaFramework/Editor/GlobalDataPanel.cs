@@ -27,10 +27,10 @@ namespace Cirilla
         public void OnGUI()
         {
             scrollPos = EditorGUILayout.BeginScrollView(scrollPos);
+            EditorGUILayout.HelpBox(tipInfo, MessageType.Info);
             for (int i = 0; i < globalData.dataList.Count; i++)
             {
                 DataPanelKV kv = globalData.dataList[i];
-                EditorGUILayout.HelpBox(tipInfo, MessageType.Info);
                 //折叠
                 EditorGUILayout.BeginHorizontal();
                 kv.foldout = EditorGUILayout.BeginFoldoutHeaderGroup(kv.foldout, kv.init ? kv.key : strNewData);

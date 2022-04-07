@@ -4,7 +4,7 @@ using UnityEngine.UI;
 
 namespace Cirilla
 {
-    [AddComponentMenu("DCiri/UI/CircleImage")]
+    [AddComponentMenu("Cirilla/UI/CircleImage")]
     public class UICircleImage : Image
     {
         protected override void Awake()

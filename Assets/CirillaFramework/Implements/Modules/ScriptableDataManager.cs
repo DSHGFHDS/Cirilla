@@ -3,12 +3,12 @@ using UnityEngine;
 
 namespace Cirilla
 {
-    public class DataPanelManager : IDataPanel
+    public class ScriptableDataManager : IScriptableData
     {
         private const string globalTableName = "GlobalTable";
         private Dictionary<string, Dictionary<string, SerializableData[]>> configStock;
         private IRes res;
-        public DataPanelManager(){
+        public ScriptableDataManager(){
             configStock = new Dictionary<string, Dictionary<string, SerializableData[]>>();
             res = IocContainer.instance.Resolve<IRes>();
             Load("Config\\" + globalTableName);

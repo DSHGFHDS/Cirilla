@@ -31,7 +31,7 @@ namespace Cirilla
             containerIns.Register<INet, NetManager>();
             containerIns.Register<IRes, ResManager>();
             containerIns.Register<ICSV, CSVManager>();
-            containerIns.Register<IDataPanel, DataPanelManager>();
+            containerIns.Register<IScriptableData, ScriptableDataManager>();
             containerIns.Register<IGoPool, GoPoolManager>();
         }
     }
