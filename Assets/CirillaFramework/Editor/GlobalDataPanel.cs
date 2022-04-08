@@ -95,8 +95,14 @@ namespace Cirilla
                             break;
                         case DataType.Object:
 #pragma warning disable 0618
-                            Object obj = EditorGUILayout.ObjectField(lastType == changedType ? (Object)value : Util.unNullUnityObject, typeof(Object), false);
-                            kv.dataList[j].SetValue(obj == null ? Util.unNullUnityObject : obj);
+                            Object objInput;
+                            if (!(value is int InstanceID)) objInput = lastType == changedType ? (Object)value : Util.unNullUnityObject;
+                            else objInput = EditorUtility.InstanceIDToObject(InstanceID);
+                            Object obj = EditorGUILayout.ObjectField(objInput, typeof(Object));
+                            int instanceID = 0;
+                            if (obj != Util.unNullUnityObject && obj != null && string.IsNullOrEmpty(AssetDatabase.GetAssetPath(obj)))
+                                instanceID = obj.GetInstanceID();
+                            kv.dataList[j].SetValue(obj == null ? Util.unNullUnityObject : obj, instanceID);
 #pragma warning restore 0618
                             break;
                         case DataType.Color:

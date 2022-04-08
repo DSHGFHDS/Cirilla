@@ -6,7 +6,7 @@ namespace Cirilla
     public class ParticleBroadcast : MonoBehaviour
     {
         private IObserver observer;
-        void Start()
+        private void Start()
         {
             ParticleSystem particle = GetComponent<ParticleSystem>();
             ParticleSystem.MainModule mainModule = particle.main;
@@ -15,7 +15,7 @@ namespace Cirilla
             observer = IocContainer.instance.Resolve<IObserver>();
         }
 
-        public void OnParticleSystemStopped(){
+        private void OnParticleSystemStopped(){
             observer.Dispatch(ParticleEvent.Stop, gameObject);
         }
     }

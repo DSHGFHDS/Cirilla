@@ -8,10 +8,10 @@ namespace Cirilla
 	public class UIMouseBroadcast : MonoBehaviour, IPointerClickHandler, IPointerEnterHandler, IPointerExitHandler, IPointerDownHandler, IDragHandler
 	{
 		private IObserver observer;
-		private void Awake()
-		{
+		private void Start(){
 			observer = IocContainer.instance.Resolve<IObserver>();
 		}
+
 		public void OnPointerClick(PointerEventData eventData)
 		{
 			if (eventData.pointerId == -1)

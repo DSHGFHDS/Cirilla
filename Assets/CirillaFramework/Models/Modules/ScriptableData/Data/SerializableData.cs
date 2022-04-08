@@ -24,6 +24,8 @@ namespace Cirilla
         [SerializeField]
         private Object ObjectValue;
         [SerializeField]
+        private int instanceID;
+        [SerializeField]
         private Color colorValue;
         [SerializeField]
         private Vector2 vecotor2Value;
@@ -53,7 +55,9 @@ namespace Cirilla
                 case DataType.String:
                     return stringValue;
                 case DataType.Object:
-                    return ObjectValue;
+                    if (instanceID != 0)
+                        return instanceID;
+                    return  ObjectValue;
                 case DataType.Color:
                     return colorValue;
                 case DataType.Vector2:
@@ -64,7 +68,7 @@ namespace Cirilla
             }
         }
 
-        public void SetValue(object value)
+        public void SetValue(object value, int instanceID = 0)
         {
             SetDefault();
             if (value is int)
@@ -111,8 +115,12 @@ namespace Cirilla
 
             if (value is Object)
             {
-                ObjectValue = (Object)value;
                 type = DataType.Object;
+                if ((this.instanceID = instanceID) != 0)
+                    return;
+
+                ObjectValue = (Object)value;
+
                 return;
             }
 
@@ -149,6 +157,7 @@ namespace Cirilla
             this.boolValue = false;
             this.stringValue = "";
             this.ObjectValue = Util.unNullUnityObject;
+            this.instanceID = 0;
             this.colorValue = Color.white;
             this.vecotor2Value = Vector2.zero;
             this.vecotor3Value = Vector3.zero;

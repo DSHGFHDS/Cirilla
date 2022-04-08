@@ -2,6 +2,7 @@
 using System;
 using System.Collections;
 using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.Reflection;
 using UnityEngine;
 
@@ -11,8 +12,10 @@ namespace Cirilla
     {
         private ConcurrentQueue<MessageInfo> messageQueue;
         private IProcess runningProcess { get; set; }
+        private List<IProcess> InitedProcesses;
         private void ProcessesInit()
         {
+            InitedProcesses = new List<IProcess>();
             messageQueue = new ConcurrentQueue<MessageInfo>();
             Type type = Util.GetTypeFromName("ProcessType", "GameLogic");
             FieldInfo[] fieldInfos = type.GetFields(BindingFlags.Static | BindingFlags.Public);
@@ -26,7 +29,6 @@ namespace Cirilla
                 containerIns.Register<IProcess>(attribute.type, i.ToString());
                 IProcess process = containerIns.Resolve<IProcess>(i.ToString());
                 process.InjectCallback(Change, base.StartCoroutine, base.StopCoroutine, base.StopAllCoroutines);
-                process.Init();
             }
 
             if(fieldInfos.Length <= 0)
@@ -43,6 +45,12 @@ namespace Cirilla
 
             if (runningProcess == process)
                 return;
+
+            if (!InitedProcesses.Contains(process))
+            {
+                process.Init();
+                InitedProcesses.Add(process);
+            }
 
             if (runningProcess != null)
                 runningProcess.OnExit();

@@ -10,14 +10,20 @@ namespace Cirilla
         private static IContainer containerIns;
         private static CirillaCore Runtime;
 
-        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
         private static void Init()
         {
-            rootGo = GameObject.Find(rootName) ?? new GameObject(rootName);
-            Runtime = rootGo.GetComponent<CirillaCore>() ?? rootGo.AddComponent<CirillaCore>();
-            containerIns = IocContainer.instance;
-            Runtime.RegisterModule();
-            Runtime.ProcessesInit();
+            if((rootGo = GameObject.Find(rootName)) == null)
+            {
+                rootGo = new GameObject(rootName);
+                Runtime = rootGo.AddComponent<CirillaCore>();
+                containerIns = IocContainer.instance;
+                Runtime.RegisterModule();
+                Runtime.ProcessesInit();
+                return;
+            }
+
+            Runtime = rootGo.GetComponent<CirillaCore>();
         }
 
         private void Awake()

@@ -43,12 +43,12 @@ namespace Cirilla
             if (trace == null)
                 return false;
 
-            string[] buffer = trace.Split(CiriDebugger.logID + "\n");
+            string[] buffer = trace.Split((CiriDebugger.logID + "\n").ToCharArray());
 
             if (buffer.Length < 2)
                 return false;
 
-            buffer = buffer[1].Split("\n");
+            buffer = buffer[1].Split("\n".ToCharArray());
             InternalEditorUtility.OpenFileAtLineExternal(buffer[0], int.Parse(buffer[1]));
             
             return true;
