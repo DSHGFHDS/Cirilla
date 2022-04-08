@@ -53,8 +53,7 @@ namespace Cirilla
                 return default(T);
             }
 
-            T value = (T)seriData[index].GetValue();
-            return value.Equals(Util.unNullUnityObject) ? default(T) : value;
+            return (T)seriData[index].GetValue();
         }
 
         public T[] GetValues<T>(string globalKey)
@@ -73,7 +72,7 @@ namespace Cirilla
             for (int i = 0; i < seriData.Length; i++)
             {
                 T value = (T)seriData[i].GetValue();
-                values[i] = value.Equals(Util.unNullUnityObject) ? default(T) : value;
+                values[i] = value;
             }
 
             if(values.Length <= 0)

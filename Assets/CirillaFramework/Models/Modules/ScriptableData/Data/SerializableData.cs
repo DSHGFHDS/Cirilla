@@ -8,7 +8,21 @@ namespace Cirilla
     [Serializable]
     public class SerializableData
     {
-        public DataType type;
+        public DataType type 
+        {
+            get { return dataType; }
+            set 
+            {
+                if (dataType == value)
+                    return;
+
+                dataType = value; 
+                SetDefault(); 
+            } 
+        }
+
+        [SerializeField]
+        private DataType dataType;
         [SerializeField]
         private int intValue;
         [SerializeField]
@@ -24,7 +38,7 @@ namespace Cirilla
         [SerializeField]
         private Object ObjectValue;
         [SerializeField]
-        private int instanceID;
+        private string instanceInfo;
         [SerializeField]
         private Color colorValue;
         [SerializeField]
@@ -32,15 +46,15 @@ namespace Cirilla
         [SerializeField]
         private Vector3 vecotor3Value;
 
-        public SerializableData(DataType type)
+        public SerializableData(DataType dataType)
         {
-            this.type = type;
+            this.dataType = dataType;
             SetDefault();
         }
 
         public object GetValue()
         {
-            switch (type)
+            switch (dataType)
             {
                 case DataType.Int:
                     return intValue;
@@ -55,9 +69,9 @@ namespace Cirilla
                 case DataType.String:
                     return stringValue;
                 case DataType.Object:
-                    if (instanceID != 0)
-                        return instanceID;
-                    return  ObjectValue;
+                    if (!string.IsNullOrEmpty(instanceInfo))
+                        return instanceInfo;
+                    return ObjectValue;
                 case DataType.Color:
                     return colorValue;
                 case DataType.Vector2:
@@ -68,84 +82,43 @@ namespace Cirilla
             }
         }
 
-        public void SetValue(object value, int instanceID = 0)
+        public void SetValue(object value)
         {
-            SetDefault();
-            if (value is int)
+            switch (dataType)
             {
-                intValue = (int)value;
-                type = DataType.Int;
-                return;
+                case DataType.Int:
+                    intValue = (int)value;
+                    break;
+                case DataType.Long:
+                    longValue = (long)value;
+                    break;
+                case DataType.Float:
+                    floatValue = (float)value;
+                    break;
+                case DataType.Double:
+                    doubleValue = (double)value;
+                    break;
+                case DataType.Bool:
+                    boolValue = (bool)value;
+                    break;
+                case DataType.String:
+                    stringValue = value.ToString();
+                    break;
+                case DataType.Object:
+                    if (value is string)
+                        this.instanceInfo = value.ToString();
+                    else ObjectValue = (Object)value;
+                    break;
+                case DataType.Color:
+                    colorValue = (Color)value;
+                    break;
+                case DataType.Vector2:
+                    vecotor2Value = (Vector2)value;
+                    break;
+                case DataType.Vector3:
+                    vecotor3Value = (Vector3)value;
+                    break;
             }
-
-            if (value is long)
-            {
-                longValue = (long)value;
-                type = DataType.Long;
-                return;
-            }
-
-            if (value is float)
-            {
-                floatValue = (float)value;
-                type = DataType.Float;
-                return;
-            }
-
-            if (value is double)
-            {
-                doubleValue = (double)value;
-                type = DataType.Double;
-                return;
-            }
-
-            if (value is bool)
-            {
-                boolValue = (bool)value;
-                type = DataType.Bool;
-                return;
-            }
-
-            if (value is string)
-            {
-                stringValue = value.ToString();
-                type = DataType.String;
-                return;
-            }
-
-            if (value is Object)
-            {
-                type = DataType.Object;
-                if ((this.instanceID = instanceID) != 0)
-                    return;
-
-                ObjectValue = (Object)value;
-
-                return;
-            }
-
-            if (value is Color)
-            {
-                colorValue = (Color)value;
-                type = DataType.Color;
-                return;
-            }
-
-            if (value is Vector2)
-            {
-                vecotor2Value = (Vector2)value;
-                type = DataType.Vector2;
-                return;
-            }
-
-            if (value is Vector3)
-            {
-                vecotor3Value = (Vector3)value;
-                type = DataType.Vector3;
-                return;
-            }
-
-            CiriDebugger.LogWarning("Set an error data");
         }
 
         private void SetDefault()
@@ -156,8 +129,8 @@ namespace Cirilla
             this.doubleValue = 0d;
             this.boolValue = false;
             this.stringValue = "";
-            this.ObjectValue = Util.unNullUnityObject;
-            this.instanceID = 0;
+            this.ObjectValue = null;
+            this.instanceInfo = "";
             this.colorValue = Color.white;
             this.vecotor2Value = Vector2.zero;
             this.vecotor3Value = Vector3.zero;
