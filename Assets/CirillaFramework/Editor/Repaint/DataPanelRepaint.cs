@@ -89,21 +89,9 @@ namespace Cirilla
                             break;
                         case DataType.Object:
 #pragma warning disable 0618
-                            Object objInput;
-                            if (value is string instanceInfo)
-                            {
-                                string[] buffer = instanceInfo.Split(new[] { instanceInfoDivider }, System.StringSplitOptions.None);
-                                objInput = EditorUtility.InstanceIDToObject(int.Parse(buffer[1]));
-                                if (objInput?.name != buffer[0])
-                                    objInput = null;
-                            }
-                            else objInput = (Object)value;
-
-                            Object obj = EditorGUILayout.ObjectField(objInput, typeof(Object));
+                            Object obj = EditorGUILayout.ObjectField((Object)value, typeof(Object));
                             if (obj != null && string.IsNullOrEmpty(AssetDatabase.GetAssetPath(obj)))
-                                kv.dataList[j].SetValue(obj.name + instanceInfoDivider + obj.GetInstanceID());
-                            else kv.dataList[j].SetValue(obj);
-
+                                kv.dataList[j].SetValue(obj.name + SerializableData.instanceInfoDivider + obj.GetInstanceID());
 #pragma warning restore 0618
                             break;
                         case DataType.Color:

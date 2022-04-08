@@ -8,6 +8,7 @@ namespace Cirilla
     [Serializable]
     public class SerializableData
     {
+        public static string instanceInfoDivider = "a4w5d4aw&*%^*7gowad4";
         public DataType type 
         {
             get { return dataType; }
@@ -69,8 +70,16 @@ namespace Cirilla
                 case DataType.String:
                     return stringValue;
                 case DataType.Object:
-                    if (!string.IsNullOrEmpty(instanceInfo))
-                        return instanceInfo;
+                    if (ObjectValue == null && !string.IsNullOrEmpty(instanceInfo))
+                    {
+                        string[] buffer = instanceInfo.Split(new[] { instanceInfoDivider }, StringSplitOptions.None);
+                        int instanceID = int.Parse(buffer[1]);
+                        Object[] objs = Object.FindObjectsOfType(typeof(GameObject));
+                        for (int i = 0; i < objs.Length; i++)
+                            if (objs[i].name == buffer[0] && objs[i].GetInstanceID() == instanceID)
+                                return ObjectValue = objs[i];
+                    }
+
                     return ObjectValue;
                 case DataType.Color:
                     return colorValue;
@@ -105,9 +114,12 @@ namespace Cirilla
                     stringValue = value.ToString();
                     break;
                 case DataType.Object:
-                    if (value is string)
-                        this.instanceInfo = value.ToString();
-                    else ObjectValue = (Object)value;
+                    if (value is string instanceInfo)
+                    {
+                        this.instanceInfo = instanceInfo;
+                        break;
+                    }
+                    ObjectValue = (Object)value;
                     break;
                 case DataType.Color:
                     colorValue = (Color)value;
@@ -123,17 +135,17 @@ namespace Cirilla
 
         private void SetDefault()
         {
-            this.intValue = 0;
-            this.longValue = 0L;
-            this.floatValue = 0f;
-            this.doubleValue = 0d;
-            this.boolValue = false;
-            this.stringValue = "";
-            this.ObjectValue = null;
-            this.instanceInfo = "";
-            this.colorValue = Color.white;
-            this.vecotor2Value = Vector2.zero;
-            this.vecotor3Value = Vector3.zero;
+            intValue = 0;
+            longValue = 0L;
+            floatValue = 0f;
+            doubleValue = 0d;
+            boolValue = false;
+            stringValue = "";
+            ObjectValue = null;
+            instanceInfo = "";
+            colorValue = Color.white;
+            vecotor2Value = Vector2.zero;
+            vecotor3Value = Vector3.zero;
         }
     }
 }
