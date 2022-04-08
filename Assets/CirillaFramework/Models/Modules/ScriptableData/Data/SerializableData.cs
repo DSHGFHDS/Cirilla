@@ -74,7 +74,8 @@ namespace Cirilla
                     {
                         string[] buffer = instanceInfo.Split(new[] { instanceInfoDivider }, StringSplitOptions.None);
                         int instanceID = int.Parse(buffer[1]);
-                        Object[] objs = Object.FindObjectsOfType(typeof(GameObject));
+                        
+                        Object[] objs = Resources.FindObjectsOfTypeAll(typeof(GameObject));
                         for (int i = 0; i < objs.Length; i++)
                             if (objs[i].name == buffer[0] && objs[i].GetInstanceID() == instanceID)
                                 return ObjectValue = objs[i];
