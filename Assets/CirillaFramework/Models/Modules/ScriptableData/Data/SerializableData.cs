@@ -79,7 +79,6 @@ namespace Cirilla
                             if (objs[i].name == buffer[0] && objs[i].GetInstanceID() == instanceID)
                                 return ObjectValue = objs[i];
                     }
-
                     return ObjectValue;
                 case DataType.Color:
                     return colorValue;
@@ -91,7 +90,7 @@ namespace Cirilla
             }
         }
 
-        public void SetValue(object value)
+        public void SetValue(object value, string instanceInfo = null)
         {
             switch (dataType)
             {
@@ -114,11 +113,7 @@ namespace Cirilla
                     stringValue = value.ToString();
                     break;
                 case DataType.Object:
-                    if (value is string instanceInfo)
-                    {
-                        this.instanceInfo = instanceInfo;
-                        break;
-                    }
+                    this.instanceInfo = instanceInfo;
                     ObjectValue = (Object)value;
                     break;
                 case DataType.Color:
