@@ -5,6 +5,7 @@ namespace Cirilla
     {
         T GetValue<T>(string globalKey, int index = 0);
         T GetValue<T>(string configName, string key, int index = 0);
+        T[] GetValues<T>(string globalKey);
         T[] GetValues<T>(string configName, string key);
         void Load(string packageName, string configName);
         void Load(string resourcePath);

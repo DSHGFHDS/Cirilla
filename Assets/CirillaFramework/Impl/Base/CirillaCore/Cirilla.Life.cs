@@ -3,6 +3,7 @@ using System;
 using System.Collections;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.IO;
 using System.Reflection;
 using UnityEngine;
 
@@ -17,8 +18,39 @@ namespace Cirilla
         {
             InitedProcesses = new List<IProcess>();
             messageQueue = new ConcurrentQueue<MessageInfo>();
-            Type type = Util.GetTypeFromName("ProcessType", "GameLogic");
-            FieldInfo[] fieldInfos = type.GetFields(BindingFlags.Static | BindingFlags.Public);
+#if UNITY_EDITOR
+            string dllPath = Environment.CurrentDirectory.Replace("\\", "/") + "/Library/ScriptAssemblies/GameLogic.dll";
+#elif UNITY_STANDALONE_WIN || UNITY_STANDALONE_WIN
+            //string dllPath = Application.streamingAssetsPath + "/EntranceCore/EntranceCore.dll";
+#elif UNITY_ANDROID
+#elif ENABLE_MICROPHONE
+#endif
+            if(!File.Exists(dllPath))
+            {
+                CiriDebugger.LogWarning(dllPath + "doesnt exist");
+                return;
+            }
+
+            byte[] dllBytes = File.ReadAllBytes(dllPath);
+            Assembly assembly = Assembly.Load(dllBytes);
+
+            Type type = null;
+            Type[] types = assembly.GetTypes();
+            for (int i = 0; i < types.Length; i++)
+            {
+                if (types[i].Name != "ProcessType")
+                    continue;
+
+                type = types[i];
+                break;
+            }
+
+            FieldInfo[] fieldInfos = type?.GetFields(BindingFlags.Static | BindingFlags.Public);
+            if (fieldInfos == null || fieldInfos.Length <= 0)
+            {
+                CiriDebugger.LogError("No processes");
+                return;
+            }
 
             for (int i = 0; i < fieldInfos.Length; i++)
             {
@@ -26,28 +58,22 @@ namespace Cirilla
                 if (attribute == null)
                     continue;
 
-                containerIns.Register<IProcess>(attribute.type, i.ToString());
-                IProcess process = containerIns.Resolve<IProcess>(i.ToString());
-                process.InjectCallback(Change, base.StartCoroutine, base.StopCoroutine, base.StopAllCoroutines);
+                containerIns.Register<IProcess>(attribute.type, attribute.type.Name);
             }
 
-            if(fieldInfos.Length <= 0)
-            {
-                CiriDebugger.Log("缺少可进入的流程");
-                return;
-            }    
-            Change(0);
+            Change((Enum)type.GetEnumValues().GetValue(0));
         }
 
-        private void Change(int processIndex, params object[] args)
+        private void Change(Enum processEnum, params object[] args)
         {
-            IProcess process = containerIns.Resolve<IProcess>(processIndex.ToString());
+            IProcess process = containerIns.Resolve<IProcess>(processEnum.ToString());
 
             if (runningProcess == process)
                 return;
 
             if (!InitedProcesses.Contains(process))
             {
+                process.InjectCallback(Change, base.StartCoroutine, base.StopCoroutine, base.StopAllCoroutines);
                 process.Init();
                 InitedProcesses.Add(process);
             }

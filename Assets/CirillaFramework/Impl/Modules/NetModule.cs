@@ -7,11 +7,11 @@ using System.Threading.Tasks;
 
 namespace Cirilla
 {
-    public class NetManager : INet
+    public class NetModule : INet
     {
         private INetBase netHandle;
         private List<NetInfoAttribute> netInfos;
-        public NetManager()
+        public NetModule()
         {
             Type type = Util.GetTypeFromName("NetType", "GameLogic");
             netInfos = new List<NetInfoAttribute>();

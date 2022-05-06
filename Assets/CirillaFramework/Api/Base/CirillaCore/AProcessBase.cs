@@ -7,11 +7,11 @@ namespace Cirilla
 {
     public abstract class AProcessBase : IProcess
     {
-        private Action<int, object[]> changeCallback;
+        private Action<Enum, object[]> changeCallback;
         private Func<IEnumerator, Coroutine> startCoroutinCallback;
         private Action<Coroutine> stopCoroutinCallback;
         private Action stopAllCoroutinsCallback;
-        public void InjectCallback(Action<int, object[]> changeCallback, Func<IEnumerator, Coroutine> startCoroutinCallback, Action<Coroutine> stopCoroutinCallback, Action stopAllCoroutinsCallback)
+        public void InjectCallback(Action<Enum, object[]> changeCallback, Func<IEnumerator, Coroutine> startCoroutinCallback, Action<Coroutine> stopCoroutinCallback, Action stopAllCoroutinsCallback)
         {
             this.changeCallback = changeCallback;
             this.startCoroutinCallback = startCoroutinCallback;
@@ -19,8 +19,8 @@ namespace Cirilla
             this.stopAllCoroutinsCallback = stopAllCoroutinsCallback;
         }
 
-        public void Change(int processIndex, params object[] args){
-            changeCallback(processIndex, args);
+        public void Change(Enum processEnum, params object[] args){
+            changeCallback(processEnum, args);
         }
 
         public Coroutine StartCoroutine(IEnumerator routine){

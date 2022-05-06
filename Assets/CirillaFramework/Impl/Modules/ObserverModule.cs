@@ -3,10 +3,10 @@ using System.Collections.Generic;
 
 namespace Cirilla
 {
-    public class ObserverManager : IObserver
+    public class ObserverModule : IObserver
     {
         private Dictionary<ValueType, Action<object[]>> stock;
-        public ObserverManager(){
+        public ObserverModule(){
             stock = new Dictionary<ValueType, Action<object[]>>();
         }
 

@@ -3,11 +3,11 @@ using UnityEngine;
 
 namespace Cirilla
 {
-    public class GoPoolManager :IGoPool
+    public class GoPoolModule :IGoPool
     {
         private const string indexInfo = "_GOPool";
         private Dictionary<string, GoPoolData> pools;
-        public GoPoolManager()
+        public GoPoolModule()
         {
             pools = new Dictionary<string, GoPoolData>();
         }
@@ -51,7 +51,6 @@ namespace Cirilla
             GameObject go = GameObject.Instantiate(prefab);
             go.name = poolName;
             go.SetActive(true);
-            GameObject.DontDestroyOnLoad(go);
             poolData.pool.Add(go, true);
 
             return go;

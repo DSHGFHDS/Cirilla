@@ -10,9 +10,10 @@ namespace Cirilla
 {
     public class ProcessPanelDraw : EditorWindow
     {
-        private static string processTypePath;
-        private static Type processType;
-        private static List<ProcessInfoAttribute> processInfos;
+        private string processTypePath;
+
+        private List<ProcessInfoAttribute> processInfos;
+        private Type processType;
 
         [MenuItem("Cirilla/流程配置表")]
         private static void Open()
@@ -20,21 +21,35 @@ namespace Cirilla
             GetWindow<ProcessPanelDraw>("流程配置表").Show();
         }
 
-        private static string tipInfo = $"流程配置表(添加后会在ProcessType中进行同步)";
+        private static string tipInfo = $"流程配置表(添加后会在项目ProcessType中进行同步)";
         private Vector2 scrollPos;
 
         private void Init()
         {
+            processInfos = new List<ProcessInfoAttribute>();
+            processTypePath = Application.dataPath + "/GameLogic";
+
+            if (!Directory.Exists(processTypePath))
+                Directory.CreateDirectory(processTypePath);
+
             processType = Util.GetTypeFromName("ProcessType", "GameLogic");
+
             if (processType == null)
-                processTypePath = (Application.dataPath + "\\" + "GameLogic\\" + MethodBase.GetCurrentMethod().DeclaringType.Namespace).Replace("/", "\\");
-            else
-                processTypePath = Util.SearchFileByType(processType);
+            {
+                processTypePath += "/ProcessType.cs";
+                File.Create(processTypePath).Close();
+                Write();
+                AssetDatabase.Refresh();
+                return;
+            }
+
+            processTypePath = Util.SearchFileByType(processTypePath, processType);
 
             LoadAttributes(processType);
         }
 
         private void OnDestroy() {
+            processType = null;
             AssetDatabase.Refresh();
         }
 
@@ -136,10 +151,10 @@ namespace Cirilla
         private void Write()
         {
             StreamWriter streamWriter = new StreamWriter(processTypePath);
-            string Message = "\n" +
-                $"namespace {MethodBase.GetCurrentMethod().DeclaringType.Namespace}" + "\n" +
+            string Message = $"using Cirilla;" + "\n" + "\n" +
+                $"namespace GameLogic" + "\n" +
                 "{" + "\n" +
-                $"   public enum {processType.Name}" + "\n" +
+                $"   public enum ProcessType" + "\n" +
                 "   {" + "\n";
             foreach (ProcessInfoAttribute processInfo in processInfos)
             {
@@ -160,10 +175,6 @@ namespace Cirilla
 
         private void LoadAttributes(Type type)
         {
-            if (type == null)
-                return;
-
-            processInfos = new List<ProcessInfoAttribute>();
             FieldInfo[] fieldInfos = type.GetFields(BindingFlags.Static | BindingFlags.Public);
             foreach (FieldInfo fieldInfo in fieldInfos)
             {

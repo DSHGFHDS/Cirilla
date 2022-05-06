@@ -21,9 +21,9 @@ namespace Cirilla
 
             return null;
         }
-        public static string SearchFileByType(Type type)
+        public static string SearchFileByType(string path, Type type)
         {
-            string[] files = Directory.GetFiles(Application.dataPath, ".", SearchOption.AllDirectories);
+            string[] files = Directory.GetFiles(path, ".", SearchOption.AllDirectories);
             for (int i = 0; i < files.Length; i++)
             {
                 if (!files[i].Contains(type.Name+".cs"))

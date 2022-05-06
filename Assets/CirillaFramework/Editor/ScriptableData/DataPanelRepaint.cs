@@ -1,36 +1,25 @@
-﻿using UnityEngine;
-using UnityEditor;
+﻿using UnityEditor;
+using UnityEngine;
+using Object = UnityEngine.Object;
 
 namespace Cirilla
 {
-    public class GlobalTablePanel : EditorWindow
-    {
-        [MenuItem("Cirilla/全局数据表")]
-        private static void Open() {
-            GetWindow<GlobalTablePanel>("全局数据表").Show();
-        }
 
+    [CustomEditor(typeof(DataPanel))]
+    public class DataPanelRepaint : Editor
+    {
         private Vector2 scrollPos;
         private const string strNewData = "新数据";
-        private const string tipInfo = "全局数据表(以下数据可通过DataPanel获取)";
-        private DataPanel globalData;
+        private const string instanceInfoDivider = "645awd78678&V18912Jw5";
 
-        private void Awake(){
-            globalData = Resources.Load<DataPanel>("Config\\GlobalTable");
-        }
-
-        private void OnDestroy()
-        {
-            AssetDatabase.SaveAssets();
-        }
-
-        public void OnGUI()
+        public override void OnInspectorGUI()
         {
             scrollPos = EditorGUILayout.BeginScrollView(scrollPos);
-            EditorGUILayout.HelpBox(tipInfo, MessageType.Info);
-            for (int i = 0; i < globalData.dataList.Count; i++)
+            DataPanel scriptableObj = target as DataPanel;
+            for (int i = 0; i < scriptableObj.dataList.Count; i++)
             {
-                DataPanelKV kv = globalData.dataList[i];
+                DataPanelKV kv = scriptableObj.dataList[i];
+
                 //折叠
                 EditorGUILayout.BeginHorizontal();
                 kv.foldout = EditorGUILayout.BeginFoldoutHeaderGroup(kv.foldout, kv.init ? kv.key : strNewData);
@@ -43,7 +32,7 @@ namespace Cirilla
 
                 if (GUILayout.Button("删除", new[] { GUILayout.Height(20), GUILayout.Width(35) }))
                 {
-                    globalData.dataList.Remove(kv);
+                    scriptableObj.dataList.Remove(kv);
                     EditorGUILayout.EndFoldoutHeaderGroup();
                     EditorGUILayout.EndHorizontal();
                     break;
@@ -56,7 +45,7 @@ namespace Cirilla
                 EditorGUILayout.BeginHorizontal();
                 EditorGUILayout.LabelField("字段:", new[] { GUILayout.Height(20), GUILayout.Width(50) });
                 string resultKey = EditorGUILayout.TextField(kv.init ? kv.key : strNewData).Trim();
-                if (!string.IsNullOrEmpty(resultKey) && resultKey != strNewData && !globalData.ContainKey(resultKey))
+                if (!string.IsNullOrEmpty(resultKey) && resultKey != strNewData && !scriptableObj.ContainKey(resultKey))
                 {
                     kv.key = resultKey;
                     kv.init = true;
@@ -131,10 +120,10 @@ namespace Cirilla
             }
             GUILayout.BeginHorizontal();
             if (GUILayout.Button("添加"))
-                globalData.dataList.Add(new DataPanelKV());
+                scriptableObj.dataList.Add(new DataPanelKV());
             GUILayout.EndHorizontal();
             EditorGUILayout.EndScrollView();
-            EditorUtility.SetDirty(globalData);
+            EditorUtility.SetDirty(target);
         }
     }
 }

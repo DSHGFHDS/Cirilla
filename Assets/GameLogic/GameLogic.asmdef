@@ -2,8 +2,7 @@
     "name": "GameLogic",
     "rootNamespace": "",
     "references": [
-        "GUID:a3f8b069e82a41f42972322307d2802c",
-        "GUID:13cad100941a6e64fbac04c742f5704f"
+        "GUID:e7a9aef731c05664882e6e05371ca4dd"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

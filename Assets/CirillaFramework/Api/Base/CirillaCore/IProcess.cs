@@ -7,7 +7,7 @@ namespace Cirilla
 {
     public interface IProcess
     {
-        void InjectCallback(Action<int, object[]> changeCallback, Func<IEnumerator, Coroutine> startCoroutinCallback, Action<Coroutine> stopCoroutinCallback, Action stopAllCoroutinsCallback);
+        void InjectCallback(Action<Enum, object[]> changeCallback, Func<IEnumerator, Coroutine> startCoroutinCallback, Action<Coroutine> stopCoroutinCallback, Action stopAllCoroutinsCallback);
         void Init();
         void OnEnter(params object[] args);
         void OnInputUpdate();
@@ -15,7 +15,7 @@ namespace Cirilla
         void OnLogicUpdatePre();
         void OnLogicUpdatePost();
         void OnExit();
-        void Change(int processIndex, params object[] args);
+        void Change(Enum processEnum, params object[] args);
         Coroutine StartCoroutine(IEnumerator routine);
         void StopCoroutine(Coroutine routine);
         void StopAllCoroutines();

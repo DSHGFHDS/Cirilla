@@ -10,7 +10,7 @@ namespace Cirilla
         private static IContainer containerIns;
         private static CirillaCore Runtime;
 
-        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
         private static void Init()
         {
             if((rootGo = GameObject.Find(rootName)) == null)
@@ -19,26 +19,24 @@ namespace Cirilla
                 Runtime = rootGo.AddComponent<CirillaCore>();
                 containerIns = IocContainer.instance;
                 Runtime.RegisterModule();
-                Runtime.ProcessesInit();
                 return;
             }
 
             Runtime = rootGo.GetComponent<CirillaCore>();
         }
 
-        private void Awake()
-        {
-            DontDestroyOnLoad(rootGo);
-        }
+        private void Awake() => DontDestroyOnLoad(rootGo);
+
+        private void Start() => ProcessesInit();
 
         private void RegisterModule()
         {
-            containerIns.Register<IObserver, ObserverManager>();
-            containerIns.Register<INet, NetManager>();
+            containerIns.Register<IObserver, ObserverModule>();
+            containerIns.Register<INet, NetModule>();
             containerIns.Register<IRes, ResManager>();
-            containerIns.Register<ICSV, CSVManager>();
-            containerIns.Register<IScriptableData, ScriptableDataManager>();
-            containerIns.Register<IGoPool, GoPoolManager>();
+            containerIns.Register<ICSV, CSVModule>();
+            containerIns.Register<IScriptableData, ScriptableDataModule>();
+            containerIns.Register<IGoPool, GoPoolModule>();
         }
     }
 }

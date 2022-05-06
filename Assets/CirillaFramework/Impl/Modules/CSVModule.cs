@@ -7,11 +7,11 @@ using UnityEngine;
 
 namespace Cirilla
 {
-    public class CSVManager : ICSV
+    public class CSVModule : ICSV
     {
         private IRes res;
         private Dictionary<Type, KeyValuePair<KeyValuePair<string, string[]>, Dictionary<object, object>>> csvDataStock;
-        public CSVManager() {
+        public CSVModule() {
             csvDataStock = new Dictionary<Type, KeyValuePair<KeyValuePair<string, string[]>, Dictionary<object, object>>>();
             res = IocContainer.instance.Resolve<IRes>();
         }
