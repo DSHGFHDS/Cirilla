@@ -1,7 +1,6 @@
 ﻿
 using System;
 using System.IO;
-using UnityEditor.Compilation;
 using UnityEngine;
 
 namespace Cirilla

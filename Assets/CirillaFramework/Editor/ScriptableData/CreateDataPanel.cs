@@ -2,7 +2,7 @@
 using UnityEngine;
 using System.IO;
 
-namespace Cirilla
+namespace Cirilla.CEditor
 {
     public class CreateDataPanel
     {

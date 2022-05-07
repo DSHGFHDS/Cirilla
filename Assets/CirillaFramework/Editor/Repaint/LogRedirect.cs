@@ -4,7 +4,7 @@ using UnityEditor;
 using UnityEditor.Callbacks;
 using UnityEditorInternal;
 
-namespace Cirilla
+namespace Cirilla.CEditor
 {
     public class LogRedirect
     {

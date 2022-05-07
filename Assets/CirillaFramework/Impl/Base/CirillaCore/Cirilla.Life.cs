@@ -21,11 +21,11 @@ namespace Cirilla
 #if UNITY_EDITOR
             string dllPath = Environment.CurrentDirectory.Replace("\\", "/") + "/Library/ScriptAssemblies/GameLogic.dll";
 #elif UNITY_STANDALONE_WIN || UNITY_STANDALONE_WIN
-            //string dllPath = Application.streamingAssetsPath + "/EntranceCore/EntranceCore.dll";
+            string dllPath = Application.streamingAssetsPath + "/GameLogic.dll";
 #elif UNITY_ANDROID
 #elif ENABLE_MICROPHONE
 #endif
-            if(!File.Exists(dllPath))
+            if (!File.Exists(dllPath))
             {
                 CiriDebugger.LogWarning(dllPath + "doesnt exist");
                 return;

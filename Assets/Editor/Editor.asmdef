@@ -1,8 +1,12 @@
 {
-    "name": "CirilaFramework",
+    "name": "Editor",
     "rootNamespace": "",
-    "references": [],
-    "includePlatforms": [],
+    "references": [
+        "GUID:e7a9aef731c05664882e6e05371ca4dd"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
     "excludePlatforms": [],
     "allowUnsafeCode": false,
     "overrideReferences": false,

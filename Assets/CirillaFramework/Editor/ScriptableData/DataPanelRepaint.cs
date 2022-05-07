@@ -2,7 +2,7 @@
 using UnityEngine;
 using Object = UnityEngine.Object;
 
-namespace Cirilla
+namespace Cirilla.CEditor
 {
 
     [CustomEditor(typeof(DataPanel))]

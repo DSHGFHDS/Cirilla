@@ -6,7 +6,7 @@ using System;
 using System.Reflection;
 using System.Collections.Generic;
 
-namespace Cirilla
+namespace Cirilla.CEditor
 {
     public class ProcessPanelDraw : EditorWindow
     {
