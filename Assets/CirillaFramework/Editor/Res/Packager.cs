@@ -8,27 +8,59 @@ namespace Cirilla.CEditor
 {
     public class Packager : Editor
     {
-        private static string devResPath = Application.dataPath.Replace('/', '\\') + "\\GameLogic\\Res";
-        private static string buildPath = Directory.GetCurrentDirectory() + "\\StreamingAssets\\Res";
         private static List<AssetBundleBuild> resBuffer = new List<AssetBundleBuild>();
         [MenuItem("Cirilla/资源打包")]
         private static void Packgae()
         {
             resBuffer.Clear();
-            PackageRoot();
-            PackageNodes();
-            
+
+            string path;
+            if (EditorUtil.devPath == string.Empty || !Directory.Exists(path = Application.dataPath + "/" + EditorUtil.devPath.Substring("Assets/".Length) + "/" + EditorUtil.resourceFolder))
+            {
+                CiriDebugger.LogWarning("打包失败，请到开发配置表中进行配置！");
+                return;
+            }
+
+            path = path.Replace('/', '\\');
+            Collect(path);
+
+            string buildPath = Application.streamingAssetsPath + $"\\{EditorUtil.platform}\\";
             if (Directory.Exists(buildPath))
                 Directory.Delete(buildPath, true);
 
             Directory.CreateDirectory(buildPath);
 
-            BuildPipeline.BuildAssetBundles(buildPath, resBuffer.ToArray(), BuildAssetBundleOptions.ChunkBasedCompression, BuildTarget.StandaloneWindows);
+            BuildTarget buildTarget = BuildTarget.StandaloneWindows;
+            switch(EditorUtil.platform)
+            {
+                case RuntimePlatform.PCx64:
+                    buildTarget = BuildTarget.StandaloneWindows64;
+                    break;
+                case RuntimePlatform.PC:
+                    buildTarget = BuildTarget.StandaloneWindows;
+                    break;
+                case RuntimePlatform.Android:
+                    buildTarget = BuildTarget.Android;
+                    break;
+                case RuntimePlatform.IOS:
+                    buildTarget = BuildTarget.iOS;
+                    break;
+            }
+
+            BuildPipeline.BuildAssetBundles(buildPath, resBuffer.ToArray(), BuildAssetBundleOptions.ChunkBasedCompression, buildTarget);
         }
-        
-        private static void PackageRoot()
+
+        private static void Collect(string path)
         {
-            DirectoryInfo directoryInfo = new DirectoryInfo(devResPath);
+            PickResources(path);
+            string[] directories = Directory.GetDirectories(path);
+            foreach (string directory in directories)
+                Collect(directory);
+        }
+
+        private static void PickResources(string path)
+        {
+            DirectoryInfo directoryInfo = new DirectoryInfo(path);
             FileInfo[] fileInfos = directoryInfo.GetFiles();
             if (fileInfos.Length <= 0)
                 return;
@@ -60,47 +92,23 @@ namespace Cirilla.CEditor
                 return;
 
             AssetBundleBuild assetBundleBuild = new AssetBundleBuild();
-            assetBundleBuild.assetBundleName = "TopRoot";
+            assetBundleBuild.assetBundleName = path.EndsWith(EditorUtil.resourceFolder) ? EditorUtil.abRoot + EditorUtil.preLoadExt + EditorUtil.abExtension : GetBundleName(path);
             assetBundleBuild.assetNames = items.ToArray();
             resBuffer.Add(assetBundleBuild);
         }
-        
-        private static void PackageNodes()
+
+        public static string GetBundleName(string path)
         {
-            string[] directories = Directory.GetDirectories(devResPath);
-            foreach (string directory in directories)
-            {
-                List<string> items = new List<string>();
-                string[] files = Directory.GetFiles(directory, ".", SearchOption.AllDirectories);
-                foreach (string file in files)
-                {
-                    if (IgnoreFile(file))
-                        continue;
+            path = path.ToLower().Replace("\\", "/");
+            string bundleName = path.Split(new[] { EditorUtil.resourceFolder.ToLower() + "/" }, System.StringSplitOptions.None)[1].GetHashCode().ToString();
 
-                    string asset = "Assets" + file.Substring(Application.dataPath.Length).Replace('\\', '/');
+            if (path.EndsWith(EditorUtil.preLoadExt))
+                return bundleName + EditorUtil.preLoadExt + EditorUtil.abExtension;
 
-                    if (!items.Contains(asset))
-                        items.Add(asset);
+            if (path.EndsWith(EditorUtil.customLoadExt))
+                return bundleName + EditorUtil.customLoadExt + EditorUtil.abExtension;
 
-                    string[] dependences = AssetDatabase.GetDependencies(asset, true);
-                    foreach (string dependence in dependences)
-                    {
-                        if (IgnoreFile(dependence) || asset == dependence)
-                            continue;
-
-                        if (!items.Contains(dependence))
-                            items.Add(dependence);
-                    }
-                }
-
-                if (items.Count <= 0)
-                    continue;
-
-                AssetBundleBuild assetBundleBuild = new AssetBundleBuild();
-                assetBundleBuild.assetBundleName = directory.Substring(devResPath.Length+1);
-                assetBundleBuild.assetNames = items.ToArray();
-                resBuffer.Add(assetBundleBuild);
-            }
+            return bundleName + EditorUtil.abExtension;
         }
 
         private static bool IgnoreFile(string file)

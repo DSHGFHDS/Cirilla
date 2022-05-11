@@ -6,9 +6,9 @@ namespace Cirilla.CEditor
 {
     public class CreateDataPanel
     {
-        private static string fileName = "NewConfig";
+        private const string fileName = "NewConfig";
         [MenuItem("Assets/Cirilla/创建配置文件")]
-        public static void CreateScriptObject()
+        private static void CreateScriptObject()
         {
             string path;
             Object[] arr = Selection.GetFiltered<Object>(SelectionMode.TopLevel);

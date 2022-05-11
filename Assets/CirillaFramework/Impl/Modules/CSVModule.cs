@@ -76,12 +76,12 @@ namespace Cirilla
         {
             if (csvDataStock.ContainsKey(typeof(T)))
                 return;
-
+            /*
             res.LoadPackage(packageName);
             TextAsset textAsset = res.LoadAsset<TextAsset>(packageName, assetName);
             string[] lines = textAsset.text.Split('\n');
             LoadStock<T>(null, lines);
-            res.UnloadAsset(packageName, assetName);
+            res.UnloadAsset(packageName, assetName);*/
         }
 
         public async void LoadCSV<T>(string filePath) where T : class

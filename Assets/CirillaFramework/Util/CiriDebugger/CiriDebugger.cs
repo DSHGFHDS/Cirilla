@@ -29,7 +29,7 @@ namespace Cirilla
 
         private static string FormatMessage(object message, LogColorType color)
         {
-            string strMsg = message.ToString();
+            string strMsg = message?.ToString();
             StackFrame sf = new StackTrace(true).GetFrame(2);
             MethodBase mb = sf.GetMethod();
             int line = +sf.GetFileLineNumber();

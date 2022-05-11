@@ -33,5 +33,12 @@ namespace Cirilla
 
             return null;
         }
+
+        public static void Write(string path, string text)
+        {
+            StreamWriter streamWriter = new StreamWriter(path);
+            streamWriter.Write(text);
+            streamWriter.Close();
+        }
     }
 }

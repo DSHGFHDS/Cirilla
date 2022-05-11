@@ -85,19 +85,19 @@ namespace Cirilla
         {
             if (configStock.ContainsKey(configName))
                 return;
-
+            /*
             res.LoadPackage(packageName);
             Load(res.LoadAsset<DataPanel>(packageName, configName));
-            res.UnloadAsset(packageName, configName);
+            res.UnloadAsset(packageName, configName);*/
         }
 
         public void Load(string resourcePath)
         {
             if (configStock.ContainsKey(resourcePath))
                 return;
-
+            /*
             Load(res.LoadAsset<DataPanel>(resourcePath));
-            res.UnloadAsset(resourcePath);
+            res.UnloadAsset(resourcePath);*/
         }
 
         public void Load(DataPanel configAsset)

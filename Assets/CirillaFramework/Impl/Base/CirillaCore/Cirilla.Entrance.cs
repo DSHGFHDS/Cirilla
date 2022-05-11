@@ -33,7 +33,7 @@ namespace Cirilla
         {
             containerIns.Register<IObserver, ObserverModule>();
             containerIns.Register<INet, NetModule>();
-            containerIns.Register<IRes, ResManager>();
+            containerIns.Register<IRes, ResModule>();
             containerIns.Register<ICSV, CSVModule>();
             containerIns.Register<IScriptableData, ScriptableDataModule>();
             containerIns.Register<IGoPool, GoPoolModule>();

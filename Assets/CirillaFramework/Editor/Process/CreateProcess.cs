@@ -6,9 +6,9 @@ namespace Cirilla.CEditor
 {
     public class CreateProcess
     {
-        private static string fileName = "NewProcess";
+        private const string fileName = "NewProcess";
         [MenuItem("Assets/Cirilla/创建流程文件")]
-        public static void CreateProcessFile()
+        private static void CreateProcessFile()
         {
             string path;
             Object[] arr = Selection.GetFiltered<Object>(SelectionMode.TopLevel);
@@ -41,7 +41,7 @@ namespace Cirilla.CEditor
 
             string code =
             "using Cirilla;" + "\n" +
-            "namespace GameLogic" + "\n" +
+            $"namespace {Path.GetFileName(EditorUtil.devPath)}" + "\n" +
             "{" + "\n" +
             $"    public class {Path.GetFileNameWithoutExtension(resultPath)} : {typeof(AProcessBase).Name}" +"\n" +
             "    {" + "\n" +
@@ -75,7 +75,7 @@ namespace Cirilla.CEditor
             "    }" + "\n" +
             "}" + "\n";
 
-            File.WriteAllText(resultPath, code);
+            Util.Write(resultPath, code);
             AssetDatabase.Refresh();
         }
     }

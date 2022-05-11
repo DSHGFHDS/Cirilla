@@ -1,0 +1,17 @@
+ManifestFileVersion: 0
+CRC: 1043846116
+Hashes:
+  AssetFileHash:
+    serializedVersion: 2
+    Hash: 1f8f9c9e29949fdcc0df9c8d7d941d6f
+  TypeTreeHash:
+    serializedVersion: 2
+    Hash: 5ad585dd02dfb5016c0dad519eab8f49
+HashAppended: 0
+ClassTypes:
+- Class: 49
+  Script: {instanceID: 0}
+SerializeReferenceClassIdentifiers: []
+Assets:
+- Assets/GameLogic/RawResources/TEST_Public/NEW_custom/FF.txt
+Dependencies: []

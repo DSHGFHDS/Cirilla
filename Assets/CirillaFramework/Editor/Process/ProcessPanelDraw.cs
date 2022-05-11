@@ -10,66 +10,59 @@ namespace Cirilla.CEditor
 {
     public class ProcessPanelDraw : EditorWindow
     {
-        private string processTypePath;
-
-        private List<ProcessInfoAttribute> processInfos;
-        private Type processType;
-
+        private List<ProcessInfoAttribute> processBuffer;
         [MenuItem("Cirilla/流程配置表")]
         private static void Open()
         { 
             GetWindow<ProcessPanelDraw>("流程配置表").Show();
         }
 
-        private static string tipInfo = $"流程配置表(添加后会在项目ProcessType中进行同步)";
         private Vector2 scrollPos;
 
-        private void Init()
-        {
-            processInfos = new List<ProcessInfoAttribute>();
-            processTypePath = Application.dataPath + "/GameLogic";
-
-            if (!Directory.Exists(processTypePath))
-                Directory.CreateDirectory(processTypePath);
-
-            processType = Util.GetTypeFromName("ProcessType", "GameLogic");
-
-            if (processType == null)
-            {
-                processTypePath += "/ProcessType.cs";
-                File.Create(processTypePath).Close();
-                Write();
-                AssetDatabase.Refresh();
-                return;
-            }
-
-            processTypePath = Util.SearchFileByType(processTypePath, processType);
-
-            LoadAttributes(processType);
-        }
-
         private void OnDestroy() {
-            processType = null;
             AssetDatabase.Refresh();
         }
 
         public void OnGUI()
         {
-            if (processType == null)
-                Init();
+            string processTypePath;
+            if (EditorUtil.devPath == String.Empty || !Directory.Exists(processTypePath = Application.dataPath + "/" + EditorUtil.devPath.Substring("Assets/".Length)))
+            {
+                EditorGUILayout.HelpBox("请在项目配置表中设置开发目录", MessageType.Warning);
+                return;
+            }
+
+            string processFile = processTypePath += "/ProcessType.cs";
+            if (!File.Exists(processFile))
+            {
+                Write(processFile, null);
+                AssetDatabase.Refresh();
+                return;
+            }
+
+            Type processType = Util.GetTypeFromName("ProcessType", Path.GetFileName(EditorUtil.devPath));
+            if(processType == null)
+            {
+                EditorGUI.HelpBox(new Rect(0, 0, 400, 20), "加载中...", MessageType.None);
+                return;
+            }
 
             scrollPos = EditorGUILayout.BeginScrollView(scrollPos);
-            EditorGUILayout.HelpBox(tipInfo, MessageType.Info);
+            EditorGUILayout.HelpBox("流程配置表(添加后会在项目ProcessType中进行同步)", MessageType.Info);
             bool entrance = true;
-            for (int i = 0; i < processInfos.Count; i ++)
+
+            if(processBuffer == null)
+                processBuffer = LoadAttributes(processType);
+
+            for (int i = 0; i < processBuffer.Count; i ++)
             {
-                ProcessInfoAttribute processInfo = processInfos[i];
+                ProcessInfoAttribute processInfo = processBuffer[i];
                 EditorGUILayout.BeginHorizontal();
                 bool foldout = EditorGUILayout.BeginFoldoutHeaderGroup(processInfo.foldout, processInfo.type == null ? "请添加流程" : processInfo.type.Name);
                 if (foldout != processInfo.foldout)
                 {
                     processInfo.foldout = foldout;
-                    Write();
+                    Write(processTypePath, processBuffer);
                     EditorGUILayout.EndFoldoutHeaderGroup();
                     EditorGUILayout.EndHorizontal();
                     continue;
@@ -84,8 +77,8 @@ namespace Cirilla.CEditor
 
                 if (GUILayout.Button("删除", new[] { GUILayout.Height(20), GUILayout.Width(35) }))
                 {
-                    processInfos.RemoveAt(i);
-                    Write();
+                    processBuffer.RemoveAt(i);
+                    Write(processTypePath, processBuffer);
                     EditorGUILayout.EndFoldoutHeaderGroup();
                     EditorGUILayout.EndHorizontal();
                     break;
@@ -112,14 +105,14 @@ namespace Cirilla.CEditor
                     if (processHandleInput == null)
                     {
                         processInfo.type = null;
-                        Write();
+                        Write(processTypePath, processBuffer);
                     }
                     else
                     {
                         bool Repeat = false;
-                        for (int j = 0; j < processInfos.Count; j++)
+                        for (int j = 0; j < processBuffer.Count; j++)
                         {
-                            if (processInfos[j].type?.Name != processHandleInput.name)
+                            if (processBuffer[j].type?.Name != processHandleInput.name)
                                 continue;
 
                             Repeat = true;
@@ -132,7 +125,7 @@ namespace Cirilla.CEditor
                             if (typeof(AProcessBase).IsAssignableFrom(inputType))
                             {
                                 processInfo.type = inputType;
-                                Write();
+                                Write(processTypePath, processBuffer);
                             }
                         }
                     }
@@ -142,39 +135,39 @@ namespace Cirilla.CEditor
             }
             GUILayout.BeginHorizontal();
             if (GUILayout.Button("添加"))
-                processInfos.Add(new ProcessInfoAttribute(null, true));
+                processBuffer.Add(new ProcessInfoAttribute(null, true));
 
             GUILayout.EndHorizontal();
             EditorGUILayout.EndScrollView();
         }
 
-        private void Write()
+        public static void Write(string path, List<ProcessInfoAttribute> processInfos)
         {
-            StreamWriter streamWriter = new StreamWriter(processTypePath);
             string Message = $"using Cirilla;" + "\n" + "\n" +
-                $"namespace GameLogic" + "\n" +
+                $"namespace {Path.GetFileName(EditorUtil.devPath)}" + "\n" +
                 "{" + "\n" +
                 $"   public enum ProcessType" + "\n" +
                 "   {" + "\n";
-            foreach (ProcessInfoAttribute processInfo in processInfos)
+            if (processInfos != null)
             {
-                if (processInfo.type == null)
-                    continue;
+                foreach (ProcessInfoAttribute processInfo in processInfos)
+                {
+                    if (processInfo.type == null)
+                        continue;
 
-                Message += $"        [{typeof(ProcessInfoAttribute).Name}(" + (processInfo.type != null ? $"typeof({processInfo.type.Name})" : "null") + $", {(processInfo.foldout ? "true" : "false")})]" + "\n";
-                Message += $"        {processInfo.type.Name}" + ",\n";
+                    Message += $"        [{typeof(ProcessInfoAttribute).Name}(" + (processInfo.type != null ? $"typeof({processInfo.type.Name})" : "null") + $", {(processInfo.foldout ? "true" : "false")})]" + "\n";
+                    Message += $"        {processInfo.type.Name}" + ",\n";
+                }
             }
             Message += 
                 "   }" + "\n" + 
                 "}" + "\n";
-
-            streamWriter.Write(Message);
-            streamWriter.Close();
-            
+            Util.Write(path, Message);
         }
 
-        private void LoadAttributes(Type type)
+        private List<ProcessInfoAttribute> LoadAttributes(Type type)
         {
+            List<ProcessInfoAttribute> processInfos = new List<ProcessInfoAttribute>();
             FieldInfo[] fieldInfos = type.GetFields(BindingFlags.Static | BindingFlags.Public);
             foreach (FieldInfo fieldInfo in fieldInfos)
             {
@@ -184,6 +177,8 @@ namespace Cirilla.CEditor
 
                 processInfos.Add(attribute);
             }
+
+            return processInfos;
         }
     }
 }

@@ -1,9 +1,7 @@
 {
     "name": "GameLogic",
     "rootNamespace": "",
-    "references": [
-        "GUID:e7a9aef731c05664882e6e05371ca4dd"
-    ],
+    "references": ["GUID:e7a9aef731c05664882e6e05371ca4dd"],
     "includePlatforms": [],
     "excludePlatforms": [],
     "allowUnsafeCode": false,

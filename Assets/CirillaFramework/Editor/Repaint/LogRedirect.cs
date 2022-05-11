@@ -37,7 +37,7 @@ namespace Cirilla.CEditor
         }
 
         [OnOpenAssetAttribute(0)]
-        public static bool OnOpenAsset(int instanceID, int line)
+        private static bool OnOpenAsset(int instanceID, int line)
         {
             string trace = GetSelectedStackTrace();
             if (trace == null)
