@@ -19,9 +19,9 @@ namespace Cirilla
             InitedProcesses = new List<IProcess>();
             messageQueue = new ConcurrentQueue<MessageInfo>();
 #if UNITY_EDITOR
-            string dllPath = Environment.CurrentDirectory.Replace("\\", "/") + "/Library/ScriptAssemblies/GameLogic.dll";
+            string dllPath = Environment.CurrentDirectory.Replace("\\", "/") + $"/Library/ScriptAssemblies/{Util.devPath.Substring("Assets/".Length)}.dll";
 #elif UNITY_STANDALONE_WIN || UNITY_STANDALONE_WIN
-            string dllPath = Application.streamingAssetsPath + "/GameLogic.dll";
+            string dllPath = Application.streamingAssetsPath + $"/{Util.devPath.Substring("Assets/".Length)}.dll";
 #elif UNITY_ANDROID
 #elif ENABLE_MICROPHONE
 #endif
@@ -101,32 +101,29 @@ namespace Cirilla
             }
         }
 
-        private void LateUpdate() {
-            runningProcess?.OnLogicUpdatePost();
-        }
+        private void LateUpdate() => runningProcess?.OnLogicUpdatePost();
+        private void FixedUpdate() => runningProcess?.OnPhysicUpdate();
 
-        private void FixedUpdate() {
-            runningProcess?.OnPhysicUpdate();
-        }
+        public static void Push(Action<object[]> callback, params object[] args) => Runtime.messageQueue.Enqueue(new MessageInfo(callback, args));
 
-        public static void Push(Action<object[]> callback, params object[] args)
+        public static Coroutine StartCoroutine(float time, Action<object[]> callBack, params object[] args) => ((MonoBehaviour)Runtime).StartCoroutine(Runtime.TaskOver(time, callBack, args));
+        public static Coroutine StartCoroutine(float time, Action callBack) => ((MonoBehaviour)Runtime).StartCoroutine(Runtime.TaskOver(time, callBack));
+        public static new Coroutine StartCoroutine(IEnumerator routine) => ((MonoBehaviour) Runtime).StartCoroutine(routine);
+
+        public static new void StopCoroutine(Coroutine routine) => ((MonoBehaviour)Runtime).StopCoroutine(routine);
+
+        public static new void StopAllCoroutines() => ((MonoBehaviour)Runtime).StopAllCoroutines();
+
+        private IEnumerator TaskOver(float time, Action<object[]> callBack, params object[] args)
         {
-            Runtime.messageQueue.Enqueue(new MessageInfo(callback, args));
+            yield return new WaitForSeconds(time);
+            callBack(args);
         }
 
-        public static new Coroutine StartCoroutine(IEnumerator routine)
+        private IEnumerator TaskOver(float time, Action callBack)
         {
-            return ((MonoBehaviour)Runtime).StartCoroutine(routine);
-        }
-
-        public static new void StopCoroutine(Coroutine routine)
-        {
-            ((MonoBehaviour)Runtime).StopCoroutine(routine);
-        }
-
-        public static new void StopAllCoroutines()
-        {
-            ((MonoBehaviour)Runtime).StopAllCoroutines();
+            yield return new WaitForSeconds(time);
+            callBack();
         }
     }
 }

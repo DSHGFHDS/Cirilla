@@ -3,7 +3,7 @@ using System;
 
 namespace Cirilla
 {
-    public interface IObserver
+    public interface IObserverModule
     {
         void Add<T>(T type, Action<object[]> callBack) where T : struct;
         void Remove<T>(T type, Action<object[]> callBack) where T : struct;

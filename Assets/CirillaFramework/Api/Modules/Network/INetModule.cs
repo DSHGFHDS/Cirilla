@@ -3,7 +3,7 @@ using System;
 
 namespace Cirilla
 {
-    public interface INet
+    public interface INetModule
     {
         void Disconnect();
         void Connect(int selected);

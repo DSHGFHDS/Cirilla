@@ -7,7 +7,7 @@ using Object = UnityEngine.Object;
 
 namespace Cirilla
 {
-    public class ResModule : IRes
+    public class ResModule : IResModule
     {
         private static readonly string resourcesPath = Application.streamingAssetsPath + "/" + Util.platform;
 
@@ -46,7 +46,7 @@ namespace Cirilla
             {
                 if (bundleName.EndsWith(Util.customLoadExt))
                 {
-                    CiriDebugger.LogError("该资源在custom包中，需要先进行包体预载:" + path);
+                    CiriDebugger.LogError("该资源在custom包中，需要先预载包体:" + path.Replace("/" + Path.GetFileName(path), ""));
                     return null;
                 }
 
@@ -66,7 +66,7 @@ namespace Cirilla
                 break;
             }
 
-            return (T)assetInfo.obj;
+            return (T)assetInfo?.obj;
         }
 
         public void LoadAssetAsync<T>(string path, Action<T> callBack) where T : Object
@@ -88,7 +88,7 @@ namespace Cirilla
 
             if (bundleName.EndsWith(Util.customLoadExt))
             {
-                CiriDebugger.LogError("该资源在custom包中，需要先进行包体预载:" + path);
+                CiriDebugger.LogError("该资源在custom包中，需要先预载包体:" + path.Replace("/" + Path.GetFileName(path), ""));
                 return;
             }
 
@@ -98,6 +98,59 @@ namespace Cirilla
                 bundles.Add(bundleName, assetBundleInfo);
                 CirillaCore.StartCoroutine(LoadAssetAsync(assetBundle, path, (obj) => { callBack((T)obj); assets.Add(path, new AssetInfo(obj, bundleName)); assetBundleInfo.assetLoaded ++; }));
             }));
+        }
+
+        public void LoadCustom(string path)
+        {
+            path = path.Replace('\\', '/').ToLower();
+            if (!path.EndsWith(Util.customLoadExt))
+                return;
+
+            string bundleName = path.GetHashCode() + Util.customLoadExt;
+
+            if (bundles.ContainsKey(bundleName))
+                return;
+
+            bundles.Add(bundleName, new AssetBundleInfo(AssetBundle.LoadFromFile(resourcesPath + "/" + bundleName + Util.abExtension)));
+        }
+        public void LoadCustomAsync(string path)
+        {
+            path = path.Replace('\\', '/').ToLower();
+            if (!path.EndsWith(Util.customLoadExt))
+                return;
+
+            string bundleName = path.GetHashCode() + Util.customLoadExt;
+
+            if (bundles.ContainsKey(bundleName))
+                return;
+
+            CirillaCore.StartCoroutine(LoadAssetBundleAsync(resourcesPath + "/" + bundleName + Util.abExtension, (assetBundle) => {
+                bundles.Add(bundleName, new AssetBundleInfo(assetBundle));
+            }));
+        }
+
+        public void UnLoadCustom(string path)
+        {
+            path = path.Replace('\\', '/').ToLower();
+            if (!path.EndsWith(Util.customLoadExt))
+                return;
+
+            string bundleName = path.GetHashCode() + Util.customLoadExt;
+
+            if (!bundles.TryGetValue(bundleName, out AssetBundleInfo assetBundleInfo))
+                return;
+
+            foreach(KeyValuePair<string, AssetInfo> kv in new Dictionary<string, AssetInfo>(assets))
+            {
+                if (kv.Value.bundleName != bundleName)
+                    continue;
+
+                UnLoadAsset(kv.Value.obj);
+                assets.Remove(kv.Key);
+            }
+
+            assetBundleInfo.assetBundle.Unload(true);
+            bundles.Remove(bundleName);
         }
 
         public void UnLoadAsset(Object obj)
@@ -116,20 +169,21 @@ namespace Cirilla
             if (target == string.Empty)
                 return;
 
+            Resources.UnloadAsset(obj);
+            string bundleName = assets[target].bundleName;
             assets.Remove(target);
-            Resources.UnloadAsset(assets[target].obj);
 
-            if (!bundles.TryGetValue(assets[target].bundleName, out AssetBundleInfo assetBundleInfo))
+            if (!bundles.TryGetValue(bundleName, out AssetBundleInfo assetBundleInfo))
                 return;
 
             if (--assetBundleInfo.assetLoaded > 0)
                 return;
 
-            if (assets[target].bundleName.EndsWith(Util.preLoadExt))
+            if (bundleName.EndsWith(Util.preLoadExt) || bundleName.EndsWith(Util.customLoadExt))
                 return;
 
             assetBundleInfo.assetBundle.Unload(true);
-            bundles.Remove(assets[target].bundleName);
+            bundles.Remove(bundleName);
         }
 
         public void Clear()
@@ -169,21 +223,23 @@ namespace Cirilla
         private IEnumerator LoadAssetAsync(AssetBundle assetBundle, string path, Action<Object> callBack)
         {
             string[] assetNames = assetBundle.GetAllAssetNames();
-            int i;
-            for (i = 0; i < assetNames.Length; i ++)
+
+            string result = string.Empty;
+            for (int i = 0; i < assetNames.Length; i ++)
             {
                 if (!assetNames[i].Contains(path))
                     continue;
+                result = assetNames[i];
                 break;
             }
 
-            AssetBundleRequest assetBundleRequest = assetBundle.LoadAssetAsync(assetNames[i]);
+            AssetBundleRequest assetBundleRequest = assetBundle.LoadAssetAsync(result);
             yield return assetBundleRequest;
 
             Object obj = assetBundleRequest.asset;
             if (obj == null)
             {
-                CiriDebugger.Log("资源加载失败:" + path);
+                CiriDebugger.Log("资源异步加载失败:" + path);
                 yield break;
             }
 

@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace Cirilla
 {
-    public class GoPoolModule :IGoPool
+    public class GoPoolModule :IGoPoolModule
     {
         private const string indexInfo = "_GOPool";
         private Dictionary<string, GoPoolData> pools;

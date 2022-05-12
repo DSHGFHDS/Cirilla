@@ -7,97 +7,31 @@ using UnityEngine;
 
 namespace Cirilla
 {
-    public class CSVModule : ICSV
+    public class CSVModule : ICSVModule
     {
-        private IRes res;
-        private Dictionary<Type, KeyValuePair<KeyValuePair<string, string[]>, Dictionary<object, object>>> csvDataStock;
         public CSVModule() {
-            csvDataStock = new Dictionary<Type, KeyValuePair<KeyValuePair<string, string[]>, Dictionary<object, object>>>();
-            res = IocContainer.instance.Resolve<IRes>();
-        }
-        public object[] GetValue<T>() where T : class
-        {
-            Type type = typeof(T);
-            if (!csvDataStock.TryGetValue(type, out KeyValuePair<KeyValuePair<string, string[]>, Dictionary<object, object>> kv))
-            {
-                Debug.LogError(type + " does not exist");
-                return null;
-            }
-
-            return new List<object>(kv.Value.Values).ToArray();
         }
 
-        public T GetValue<T>(object primaryKey) where T : class
+        public T[] Load<T>(TextAsset textAsset) where T : class
         {
-            Type type = typeof(T);
-            if (!csvDataStock.TryGetValue(type, out KeyValuePair<KeyValuePair<string, string[]>, Dictionary<object, object>> kv))
-            {
-                CiriDebugger.LogError(type + " does not exist");
-                return null;
-            }
-
-            if (!kv.Value.TryGetValue(primaryKey, out object csvData))
+            if (textAsset == null)
                 return null;
 
-            return (T)csvData;
-        }
-
-        public void SetValue(object csvData)
-        {
-            Type type = csvData.GetType();
-            if (!csvDataStock.TryGetValue(type, out KeyValuePair<KeyValuePair<string, string[]>, Dictionary<object, object>> kv))
-            {
-                CiriDebugger.LogError(type + " does not exist");
-                return;
-            }
-
-            if(kv.Key.Key == null)
-            {
-                CiriDebugger.LogError("ABPackage can't be rewrited");
-                return;
-            }
-
-            PropertyInfo[] props = type.GetProperties(BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Instance);
-            if (props.Length < 1)
-                return;
-
-            object primaryKey = props[0].GetValue(csvData);
-            if (!kv.Value.ContainsKey(primaryKey))
-            {
-                CiriDebugger.LogError("primaryKey:" + primaryKey + " does not exist");
-                return;
-            }
-
-            csvDataStock[type].Value[primaryKey] = csvData;
-            WriteCSV(type);
-        }
-
-        public void LoadCSV<T>(string packageName, string assetName) where T : class
-        {
-            if (csvDataStock.ContainsKey(typeof(T)))
-                return;
-            /*
-            res.LoadPackage(packageName);
-            TextAsset textAsset = res.LoadAsset<TextAsset>(packageName, assetName);
             string[] lines = textAsset.text.Split('\n');
-            LoadStock<T>(null, lines);
-            res.UnloadAsset(packageName, assetName);*/
+            return ReadText<T>(lines);
         }
 
-        public async void LoadCSV<T>(string filePath) where T : class
+        public async Task<T[]> Load<T>(string path) where T : class
         {
-            if (csvDataStock.ContainsKey(typeof(T)))
-                return;
+            path = Application.streamingAssetsPath + "/" + path;
 
-            filePath = Application.streamingAssetsPath + "/" + filePath;
-
-            if (filePath == null || !File.Exists(filePath))
+            if (path == null || !File.Exists(path))
             {
-                CiriDebugger.LogError(filePath + " does not exist");
-                return;
+                CiriDebugger.LogError("文件不存在:" + path);
+                return null;
             }
             
-            StreamReader streamReader = new StreamReader(filePath, System.Text.Encoding.UTF8);
+            StreamReader streamReader = new StreamReader(path, System.Text.Encoding.UTF8);
             List<Task<string>> taskPool = new List<Task<string>>();
             
             while (!streamReader.EndOfStream)
@@ -106,24 +40,23 @@ namespace Cirilla
             string[] lines = new string[taskPool.Count];
             for (int i = 0; i < taskPool.Count; i++)
                 lines[i] = await taskPool[i];
-
-            LoadStock<T>(filePath, lines);
-
             streamReader.Close();
+
+            return ReadText<T>(lines);
         }
 
-        private void LoadStock<T>(string filePath, string[] lines) where T : class
+        private T[] ReadText<T>(string[] lines) where T : class
         {
             if (lines.Length <= 2)
-                return;
+                return null;
 
             Type type = typeof(T);
             string[] keys = lines[1].Split(',');
             PropertyInfo[] props = type.GetProperties(BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Instance);
             if (keys.Length != props.Length)
             {
-                CiriDebugger.LogError(type.Name + " does not fixed");
-                return;
+                CiriDebugger.LogError("类型不匹配:" + type.Name);
+                return null;
             }
 
             for (int i = 0; i < props.Length; i++)
@@ -131,11 +64,11 @@ namespace Cirilla
                 if (props[i].Name == keys[i])
                     continue;
 
-                CiriDebugger.LogError(type.Name + " does not fixed");
-                return;
+                CiriDebugger.LogError("类型不匹配:" + type.Name);
+                return null;
             }
 
-            csvDataStock.Add(type, new KeyValuePair<KeyValuePair<string, string[]>, Dictionary<object, object>>(new KeyValuePair<string, string[]>(filePath, new string[2] { lines[0], lines[1] }), new Dictionary<object, object>()));
+            List<T> objs = new List<T>();
 
             for (int i = 2; i < lines.Length; i++)
             {
@@ -146,8 +79,8 @@ namespace Cirilla
 
                 if (values.Length != props.Length)
                 {
-                    CiriDebugger.LogError(filePath+"|Line:" + (i+1) + " error");
-                    return;
+                    CiriDebugger.LogError($"读取{type.Name}时，出现错误:{(i + 1)}行");
+                    return null;
                 }
 
                 T obj = Activator.CreateInstance<T>();
@@ -176,24 +109,45 @@ namespace Cirilla
 
                     props[j].SetValue(obj, Convert.ChangeType(value, props[j].PropertyType), null);
                 }
-                csvDataStock[type].Value.Add(props[0].GetValue(obj), obj);
+
+                objs.Add(obj);
             }
+
+            return objs.ToArray();
         }
 
-        private void WriteCSV(Type type)
+        public void Write<T>(T[] csvDatas, string path)
         {
-            if (!csvDataStock.TryGetValue(type, out KeyValuePair<KeyValuePair<string, string[]>, Dictionary<object, object>> kv))
+            path = Application.streamingAssetsPath + "/" + path;
+
+            Type type = csvDatas.GetType();
+            PropertyInfo[] props = type.GetProperties(BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Instance);
+            if (props.Length < 1)
                 return;
 
-            if (kv.Key.Key == null)
+            StreamWriter streamWriter;
+            try
+            {
+                streamWriter = new StreamWriter(path, false, System.Text.Encoding.UTF8);
+            }
+            catch (Exception ex)
+            {
+                CiriDebugger.LogError(ex);
                 return;
+            }
 
             List<Task> taskPool = new List<Task>();
-            PropertyInfo[] props = type.GetProperties(BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Instance);
-            StreamWriter streamWriter = new StreamWriter(kv.Key.Key, false, System.Text.Encoding.UTF8);
-            taskPool.Add(streamWriter.WriteLineAsync(kv.Key.Value[0]));
-            taskPool.Add(streamWriter.WriteLineAsync(kv.Key.Value[1]));
-            foreach (object csvData in kv.Value.Values)
+            string message = string.Empty;
+            for(int i = 0; i < props.Length; i ++)
+            {
+                message += props[i].Name;
+                if (i == props.Length-1)
+                    break;
+                message += ",";
+            }
+            taskPool.Add(streamWriter.WriteLineAsync(message));
+
+            foreach (T csvData in csvDatas)
             {
                 string line = string.Empty;
                 for (int i = 0; i < props.Length; i++)
@@ -224,21 +178,6 @@ namespace Cirilla
             
             Task.WaitAll(taskPool.ToArray());
             streamWriter.Close();
-        }
-
-        public void Remove<T>()
-        {
-            Type type = typeof(T);
-            if (!csvDataStock.ContainsKey(type))
-                return;
-
-            csvDataStock.Remove(type);
-        }
-
-
-        public void Clear()
-        {
-            csvDataStock.Clear();
         }
     }
 }

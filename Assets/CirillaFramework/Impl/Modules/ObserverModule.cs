@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace Cirilla
 {
-    public class ObserverModule : IObserver
+    public class ObserverModule : IObserverModule
     {
         private Dictionary<ValueType, Action<object[]>> stock;
         public ObserverModule(){

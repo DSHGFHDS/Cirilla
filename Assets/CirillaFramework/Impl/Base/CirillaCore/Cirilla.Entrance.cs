@@ -31,12 +31,11 @@ namespace Cirilla
 
         private void RegisterModule()
         {
-            containerIns.Register<IObserver, ObserverModule>();
-            containerIns.Register<INet, NetModule>();
-            containerIns.Register<IRes, ResModule>();
-            containerIns.Register<ICSV, CSVModule>();
-            containerIns.Register<IScriptableData, ScriptableDataModule>();
-            containerIns.Register<IGoPool, GoPoolModule>();
+            containerIns.Register<IObserverModule, ObserverModule>();
+            containerIns.Register<IResModule, ResModule>();
+            containerIns.Register<INetModule, NetModule>();
+            containerIns.Register<ICSVModule, CSVModule>();
+            containerIns.Register<IGoPoolModule, GoPoolModule>();
         }
     }
 }

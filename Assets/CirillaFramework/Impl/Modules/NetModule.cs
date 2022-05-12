@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace Cirilla
 {
-    public class NetModule : INet
+    public class NetModule : INetModule
     {
         private INetBase netHandle;
         private List<NetInfoAttribute> netInfos;

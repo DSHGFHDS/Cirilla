@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace Cirilla
 {
-    public interface IGoPool
+    public interface IGoPoolModule
     {
         GameObject Acquire(GameObject prefab);
         void Recycle(GameObject go);
