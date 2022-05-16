@@ -14,6 +14,7 @@ namespace Cirilla
         private ConcurrentQueue<MessageInfo> messageQueue;
         private IProcess runningProcess { get; set; }
         private List<IProcess> InitedProcesses;
+        private IMVCModule mVCModule;
         private void ProcessesInit()
         {
             InitedProcesses = new List<IProcess>();
@@ -27,7 +28,7 @@ namespace Cirilla
 #endif
             if (!File.Exists(dllPath))
             {
-                CiriDebugger.LogWarning(dllPath + "doesnt exist");
+                CiriDebugger.LogWarning(dllPath + "不存在");
                 return;
             }
 
@@ -48,7 +49,7 @@ namespace Cirilla
             FieldInfo[] fieldInfos = type?.GetFields(BindingFlags.Static | BindingFlags.Public);
             if (fieldInfos == null || fieldInfos.Length <= 0)
             {
-                CiriDebugger.LogError("No processes");
+                CiriDebugger.LogError("缺少可载入流程");
                 return;
             }
 
@@ -60,7 +61,7 @@ namespace Cirilla
 
                 containerIns.Register<IProcess>(attribute.type, attribute.type.Name);
             }
-
+            mVCModule = containerIns.Resolve<IMVCModule>();
             Change((Enum)type.GetEnumValues().GetValue(0));
         }
 
@@ -76,6 +77,7 @@ namespace Cirilla
                 process.InjectCallback(Change, base.StartCoroutine, base.StopCoroutine, base.StopAllCoroutines);
                 process.Init();
                 InitedProcesses.Add(process);
+                mVCModule.InjectController(containerIns.GetContentInfo<IProcess>(processEnum.ToString()));
             }
 
             if (runningProcess != null)

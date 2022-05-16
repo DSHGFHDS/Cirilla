@@ -37,7 +37,7 @@ namespace Cirilla.CEditor
         }
 
         [OnOpenAssetAttribute(0)]
-        private static bool OnOpenAsset(int instanceID, int line)
+        public static bool OnOpenAsset(int instanceID, int line)
         {
             string trace = GetSelectedStackTrace();
             if (trace == null)
@@ -48,9 +48,9 @@ namespace Cirilla.CEditor
             if (buffer.Length < 2)
                 return false;
 
-            buffer = buffer[1].Split(new [] { "\n" }, System.StringSplitOptions.None);
+            buffer = buffer[1].Split('\n');
             InternalEditorUtility.OpenFileAtLineExternal(buffer[0], int.Parse(buffer[1]));
-            
+
             return true;
         }
     }

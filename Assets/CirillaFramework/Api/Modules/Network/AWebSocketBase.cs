@@ -11,6 +11,7 @@ namespace Cirilla
         public string url;
         public bool isConnected { get { return webSocket != null; } }
 
+        private const string normalClosureKey = "WEBSOCKET_NORMAL_CLOSE";
         private ClientWebSocket webSocket;
         public AWebSocketBase(string url, int bufferLen)
         {
@@ -59,7 +60,9 @@ namespace Cirilla
                                   CirillaCore.Push(Received, System.Text.Encoding.UTF8.GetString(bytes));
                                   break;
                               case WebSocketMessageType.Close:
-                                  Close();
+                                  if (result.CloseStatusDescription == normalClosureKey)
+                                      break;
+                                      Close();
                                   break;
                           }
                       }
@@ -72,7 +75,7 @@ namespace Cirilla
                });
         }
 
-        public void Disconnect()
+        public async void Disconnect()
         {
             if (webSocket.State != WebSocketState.Open)
             {
@@ -80,7 +83,8 @@ namespace Cirilla
                 return;
             }
 
-            Close();
+            await webSocket.CloseAsync(WebSocketCloseStatus.Empty, normalClosureKey, CancellationToken.None);
+            Disconnected();
         }
 
         public bool Send(byte[] netPackge, bool isBinary = true)

@@ -4,12 +4,15 @@ using System.IO;
 using System.Reflection;
 using System.Threading.Tasks;
 using UnityEngine;
+using System.Text;
+using System.ComponentModel;
 
 namespace Cirilla
 {
     public class CSVModule : ICSVModule
     {
-        public CSVModule() {
+        public CSVModule()
+        {
         }
 
         public T[] Load<T>(TextAsset textAsset) where T : class
@@ -30,10 +33,10 @@ namespace Cirilla
                 CiriDebugger.LogError("文件不存在:" + path);
                 return null;
             }
-            
-            StreamReader streamReader = new StreamReader(path, System.Text.Encoding.UTF8);
+
+            StreamReader streamReader = new StreamReader(path, Encoding.UTF8);
             List<Task<string>> taskPool = new List<Task<string>>();
-            
+
             while (!streamReader.EndOfStream)
                 taskPool.Add(streamReader.ReadLineAsync());
 
@@ -72,7 +75,7 @@ namespace Cirilla
 
             for (int i = 2; i < lines.Length; i++)
             {
-                if(string.IsNullOrEmpty(lines[i].Trim()))
+                if (string.IsNullOrEmpty(lines[i].Trim()))
                     continue;
 
                 string[] values = lines[i].Split(',');
@@ -87,6 +90,7 @@ namespace Cirilla
                 for (int j = 0; j < props.Length; j++)
                 {
                     string value = values[j].Trim();
+
                     if (props[j].PropertyType == typeof(bool))
                     {
                         switch (value)
@@ -101,7 +105,7 @@ namespace Cirilla
                         continue;
                     }
 
-                    if (props[j].PropertyType != typeof(string) && !int.TryParse(value, out int result))
+                    if (props[j].PropertyType != typeof(string) && !Util.IsNumeric(value))
                     {
                         props[j].SetValue(obj, Convert.ChangeType(0, props[j].PropertyType), null);
                         continue;
@@ -120,7 +124,7 @@ namespace Cirilla
         {
             path = Application.streamingAssetsPath + "/" + path;
 
-            Type type = csvDatas.GetType();
+            Type type = csvDatas[0].GetType();
             PropertyInfo[] props = type.GetProperties(BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Instance);
             if (props.Length < 1)
                 return;
@@ -128,7 +132,7 @@ namespace Cirilla
             StreamWriter streamWriter;
             try
             {
-                streamWriter = new StreamWriter(path, false, System.Text.Encoding.UTF8);
+                streamWriter = new StreamWriter(path, false, Encoding.UTF8);
             }
             catch (Exception ex)
             {
@@ -138,13 +142,19 @@ namespace Cirilla
 
             List<Task> taskPool = new List<Task>();
             string message = string.Empty;
-            for(int i = 0; i < props.Length; i ++)
+            string description = string.Empty;
+            for (int i = 0; i < props.Length; i++)
             {
+
+                description += props[i].GetCustomAttribute<DescriptionAttribute>()?.Description ?? "*";
                 message += props[i].Name;
-                if (i == props.Length-1)
+
+                if (i == props.Length - 1)
                     break;
+                description += ",";
                 message += ",";
             }
+            taskPool.Add(streamWriter.WriteLineAsync(description));
             taskPool.Add(streamWriter.WriteLineAsync(message));
 
             foreach (T csvData in csvDatas)
@@ -156,14 +166,14 @@ namespace Cirilla
                     object data = props[i].GetValue(csvData);
                     if (data != null)
                     {
-                        if(data.GetType() == typeof(bool))
+                        if (data.GetType() == typeof(bool))
                         {
-                            switch((bool)data)
+                            switch ((bool)data)
                             {
                                 case true:
                                     strData = "1";
                                     break;
-                                    case false:
+                                case false:
                                     strData = "0";
                                     break;
                             }
@@ -175,9 +185,10 @@ namespace Cirilla
                 }
                 taskPool.Add(streamWriter.WriteLineAsync(line));
             }
-            
+
             Task.WaitAll(taskPool.ToArray());
             streamWriter.Close();
         }
     }
 }
+

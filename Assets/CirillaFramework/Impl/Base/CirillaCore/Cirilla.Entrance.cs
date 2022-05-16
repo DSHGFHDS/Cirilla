@@ -1,5 +1,6 @@
 
 using UnityEngine;
+using UnityEngine.EventSystems;
 
 namespace Cirilla
 {
@@ -16,6 +17,8 @@ namespace Cirilla
             if((rootGo = GameObject.Find(rootName)) == null)
             {
                 rootGo = new GameObject(rootName);
+                rootGo.AddComponent<EventSystem>();
+                rootGo.AddComponent<StandaloneInputModule>();
                 Runtime = rootGo.AddComponent<CirillaCore>();
                 containerIns = IocContainer.instance;
                 Runtime.RegisterModule();
@@ -31,6 +34,7 @@ namespace Cirilla
 
         private void RegisterModule()
         {
+            containerIns.Register<IMVCModule, MVCModule>();
             containerIns.Register<IObserverModule, ObserverModule>();
             containerIns.Register<IResModule, ResModule>();
             containerIns.Register<INetModule, NetModule>();

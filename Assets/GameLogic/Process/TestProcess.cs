@@ -3,8 +3,9 @@ using UnityEngine;
 
 namespace GameLogic
 {
-    public class NewProcess : AProcessBase
+    public class TestProcess : AProcessBase
     {
+        [Controller] TESTController testController;
         [Dependency] IResModule resModule;
         [Dependency] ICSVModule csvModule;
         #region 流程初始化与释放
@@ -15,6 +16,7 @@ namespace GameLogic
         #region 流程往返
         public override void OnEnter(params object[] args)
         {
+
         }
         public override void OnExit()
         {

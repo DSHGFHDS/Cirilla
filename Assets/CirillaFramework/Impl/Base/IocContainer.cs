@@ -8,20 +8,18 @@ namespace Cirilla
     public class IocContainer : ASingletonBase<IocContainer>, IContainer
     {
         private const BindingFlags Flag = BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.DeclaredOnly;
-        private const string originKey = "";
-        private Dictionary<Type, Dictionary<string, TypeInfo>> stock;
+        private Dictionary<Type, Dictionary<string, ContentInfo>> stock;
         
-        public IocContainer()
-        {
-            stock = new Dictionary<Type, Dictionary<string, TypeInfo>>();
-        }
+        public IocContainer() => stock = new Dictionary<Type, Dictionary<string, ContentInfo>>();
 
-        private void Inject(object obj)
+        private void Inject(ContentInfo contentInfo)
         {
+            Object obj = contentInfo.obj;
             Type type = obj.GetType();
             FieldInfo[] fieldInfo = type.GetFields(Flag);
             for (int i = 0; i < fieldInfo.Length; i++)
             {
+                contentInfo.fieldInfos.Add(fieldInfo[i]);
                 DependencyAttribute attribute = fieldInfo[i].GetCustomAttribute<DependencyAttribute>();
                 if (attribute == null)
                     continue;
@@ -39,78 +37,96 @@ namespace Cirilla
             }
         }
         
-        private void Register<T>(string key, TypeInfo typeInfo)
+        private void Register<T>(string key, ContentInfo contentInfo)
         {
             Type type = typeof(T);
-            if (stock.TryGetValue(type, out Dictionary<string, TypeInfo> typeInfos))
+            if (stock.TryGetValue(type, out Dictionary<string, ContentInfo> contentInfos))
             {
-                if (typeInfos.ContainsKey(key))
+                if (contentInfos.ContainsKey(key))
                     return;
 
-                typeInfos.Add(key, typeInfo);
+                contentInfos.Add(key, contentInfo);
 
                 return;
             }
 
-            stock.Add(type, new Dictionary<string, TypeInfo>() { { key, typeInfo } });
+            stock.Add(type, new Dictionary<string, ContentInfo>() { { key, contentInfo } });
         }
 
-        public void Register<T>(Type type, string key = originKey){
-            Register<T>(key, new TypeInfo(type, null));
-        }
+        public void Register<T>(Type type, string key) => Register<T>(key, new ContentInfo(type, key, null));
 
-        public void Register<T1, T2>(string key = originKey) where T1 : class where T2 : T1{
-            Register<T1>(key, new TypeInfo(typeof(T2), null));
-        }
+        public void Register<T1, T2>(string key) where T1 : class where T2 : T1 => Register<T1>(key, new ContentInfo(typeof(T2), key, null));
 
-        public void Register<T>(T instance, string key = originKey){
-            Register<T>(key, new TypeInfo(instance.GetType(), instance));
-        }
+        public void Register<T>(T instance, string key) => Register<T>(key, new ContentInfo(instance.GetType(), key, instance));
 
-        public void Unregister<T>(string key = originKey)
+        public void Unregister<T>(string key)
         {
             Type type = typeof(T);
-            if (!stock.TryGetValue(type, out Dictionary<string, TypeInfo> typeInfos))
+            if (!stock.TryGetValue(type, out Dictionary<string, ContentInfo> contentInfos))
                 return;
 
-            if (!typeInfos.ContainsKey(key))
+            if (!contentInfos.ContainsKey(key))
                 return;
 
-            typeInfos.Remove(key);
+            contentInfos.Remove(key);
         }
 
-        public T Resolve<T>(string key = originKey) where T : class
+        public T Resolve<T>(string key) where T : class
         {
             Type type = typeof(T);
             return (T)Resolve(type, key);
         }
 
-        public object Resolve(Type type, string key = originKey)
+        public object Resolve(Type type, string key)
         {
-            if (!stock.TryGetValue(type, out Dictionary<string, TypeInfo> typeInfos))
+            if (!stock.TryGetValue(type, out Dictionary<string, ContentInfo> contentInfos))
             {
-                CiriDebugger.Log("Unregister Type:" + type);
+                CiriDebugger.Log("ÀàÐÍÎ´×¢²á:" + type);
                 return null;
             }
 
-            if (!typeInfos.TryGetValue(key, out TypeInfo typeInfo))
+            if (!contentInfos.TryGetValue(key, out ContentInfo contentInfo))
             {
-                CiriDebugger.Log("Unregister key:" + key);
+                CiriDebugger.Log("¼üÖµÎ´×¢²á:" + key);
                 return null;
             }
 
-            object obj = typeInfo.instance;
-            if (typeInfo.IsInjected)
+            object obj = contentInfo.obj;
+            if (contentInfo.IsInjected)
                 return obj;
 
-            Inject(obj);
-            typeInfo.IsInjected = true;
+            Inject(contentInfo);
+            contentInfo.IsInjected = true;
 
             return obj;
         }
 
-        public void Clear() {
-            stock.Clear();
+        public ContentInfo GetContentInfo<T>(string key) where T : class
+        {
+            Type type = typeof(T);
+            return GetContentInfo(type, key);
         }
+
+        public ContentInfo GetContentInfo(Type type, string key)
+        {
+            if (!stock.TryGetValue(type, out Dictionary<string, ContentInfo> contentInfos))
+                return null;
+
+            if (!contentInfos.TryGetValue(key, out ContentInfo contentInfo))
+                return null;
+
+            return contentInfo;
+        }
+
+        public ContentInfo[] GetContentInfos()
+        {
+            List<ContentInfo> contentInfosBuffer = null;
+            foreach (Dictionary<string, ContentInfo> contentInfos in stock.Values)
+                contentInfosBuffer = new List<ContentInfo>(contentInfos.Values);
+            return contentInfosBuffer?.ToArray();
+        }
+
+        public void Clear() => stock.Clear();
+
     }
 }

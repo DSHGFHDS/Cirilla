@@ -18,6 +18,9 @@ namespace Cirilla
             AssetBundle.UnloadAllAssetBundles(true);
             assets = new Dictionary<string, AssetInfo>();
             bundles = new Dictionary<string, AssetBundleInfo>();
+            if (!Directory.Exists(resourcesPath))
+                return;
+
             DirectoryInfo directoryInfo = new DirectoryInfo(resourcesPath);
             FileInfo[] fileInfos = directoryInfo.GetFiles();
             foreach(FileInfo fileInfo in fileInfos)

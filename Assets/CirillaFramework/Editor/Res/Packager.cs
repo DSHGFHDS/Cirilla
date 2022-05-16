@@ -10,7 +10,7 @@ namespace Cirilla.CEditor
     {
         private static List<AssetBundleBuild> resBuffer = new List<AssetBundleBuild>();
         [MenuItem("Cirilla/资源打包")]
-        private static void Packgae()
+        public static void Packgae()
         {
             resBuffer.Clear();
 

@@ -1,8 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Net;
-using System.Reflection;
 using System.Threading.Tasks;
 
 namespace Cirilla
@@ -10,29 +8,17 @@ namespace Cirilla
     public class NetModule : INetModule
     {
         private INetBase netHandle;
-        private List<NetInfoAttribute> netInfos;
+
         public NetModule()
         {
-            Type type = Util.GetTypeFromName("NetType", "GameLogic");
-            netInfos = new List<NetInfoAttribute>();
-            FieldInfo[] fieldInfos = type.GetFields(BindingFlags.Static | BindingFlags.Public);
-            foreach (FieldInfo fieldInfo in fieldInfos)
-            {
-                NetInfoAttribute attribute = fieldInfo.GetCustomAttribute<NetInfoAttribute>();
-                if (attribute == null)
-                    continue;
-
-                netInfos.Add(attribute);
-            }
         }
 
-        public void Connect(int selected)
+        public void Connect(INetBase netHandle)
         {
             if (netHandle != null)
                 netHandle.Disconnect();
 
-            netHandle = (INetBase)Activator.CreateInstance(netInfos[selected].type, netInfos[selected].url, 1024 * 8);
-
+            this.netHandle = netHandle;
             netHandle.Connect();
         }
 

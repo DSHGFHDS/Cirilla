@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b5ce4bc30e927784aa5b781123b68e78, type: 3}
   m_Name: DevConfig
   m_EditorClassIdentifier: 
-  runtimePlatform: 0
+  runtimePlatform: 1
   projectPath: Assets/GameLogic
   assetBundleExtension: .pk
   resourcesFolder: RawResources
