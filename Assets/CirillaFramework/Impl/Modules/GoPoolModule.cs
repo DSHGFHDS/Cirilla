@@ -7,7 +7,6 @@ namespace Cirilla
     {
         private const string indexInfo = "_GOPool";
         private Dictionary<string, GoPoolData> pools;
-        private Vector3 vanityPos = new Vector3(-9999,-9999,-9999);
         public GoPoolModule()
         {
             pools = new Dictionary<string, GoPoolData>();
@@ -44,7 +43,6 @@ namespace Cirilla
 
             GameObject go = GameObject.Instantiate(prefab);
             go.AddComponent<GoPoolEntity>().Init(OnGoDestroy);
-            go.transform.position = vanityPos;
             go.name = poolName;
             go.SetActive(true);
             poolData.pool.Add(go, true);
@@ -74,7 +72,6 @@ namespace Cirilla
 
             poolData.pool[go] = false;
             go.SetActive(false);
-            go.transform.position = vanityPos;
         }
 
         public void Load(GameObject prefab, int capacity)

@@ -12,36 +12,4 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b4c8052cfe90f1040b23f2992d7e7a1e, type: 3}
   m_Name: NewConfig
   m_EditorClassIdentifier: 
-  dataList:
-  - dataList:
-    - dataType: 5
-      intValue: 0
-      longValue: 0
-      floatValue: 0
-      doubleValue: 0
-      boolValue: 0
-      stringValue: 
-      ObjectValue: {fileID: 0}
-      instanceInfo: 
-      colorValue: {r: 1, g: 1, b: 1, a: 1}
-      vecotor2Value: {x: 0, y: 0}
-      vecotor3Value: {x: 0, y: 0, z: 0}
-    init: 0
-    foldout: 1
-    key: fc6de539-feeb-4169-b509-433c5dc53a32
-  - dataList:
-    - dataType: 0
-      intValue: 0
-      longValue: 0
-      floatValue: 0
-      doubleValue: 0
-      boolValue: 0
-      stringValue: 
-      ObjectValue: {fileID: 0}
-      instanceInfo: 
-      colorValue: {r: 1, g: 1, b: 1, a: 1}
-      vecotor2Value: {x: 0, y: 0}
-      vecotor3Value: {x: 0, y: 0, z: 0}
-    init: 0
-    foldout: 1
-    key: e21adaec-6b83-4801-97f6-6e4c844acdc4
+  dataList: []

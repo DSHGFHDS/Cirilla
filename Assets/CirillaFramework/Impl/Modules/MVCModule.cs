@@ -9,14 +9,35 @@ namespace Cirilla
 
         public MVCModule() => containerIns = IocContainer.instance;
 
-        public T Add<T>(string key) where T : class, IController => (T)Load(typeof(T), key);
+        public T Add<T>(string key) where T : class, IMVCBase => (T)Load(typeof(T), key);
 
         public object Add(Type type, string key)
         {
-            if (!(type is IController))
+            if (!(typeof(IMVCBase).IsAssignableFrom(type)))
                 return null;
 
             return Load(type, key);
+        }
+
+        public void Remove<T>(string key) where T : class, IMVCBase => Remove(typeof(T), key);
+
+        public void Remove(Type type, string key)
+        {
+            if (!(typeof(IMVCBase).IsAssignableFrom(type)))
+                return;
+
+            string finalKey = type.Name + key;
+
+            foreach (ContentInfo contentInfo in containerIns.GetContentInfos<IMVCBase>())
+            {
+                if (contentInfo.key != finalKey)
+                    continue;
+
+                ((IMVCBase)contentInfo.obj).Dispose();
+                containerIns.Unregister<IMVCBase>(contentInfo.key);
+
+                break;
+            }
         }
 
         public void InjectController(ContentInfo contentInfo)

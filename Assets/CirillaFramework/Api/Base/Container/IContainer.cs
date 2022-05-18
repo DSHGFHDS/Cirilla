@@ -1,6 +1,5 @@
 ﻿
 using System;
-using System.Reflection;
 
 namespace Cirilla
 {
@@ -13,6 +12,10 @@ namespace Cirilla
         T Resolve<T>(string key = "") where T : class;
         ContentInfo GetContentInfo<T>(string key) where T : class;
         ContentInfo GetContentInfo(Type type, string key);
+
+        ContentInfo[] GetContentInfos<T>();
+        ContentInfo[] GetContentInfos();
+
         object Resolve(Type type, string key = "");
         void Clear();
     }

@@ -36,7 +36,6 @@ namespace Cirilla
                 fieldInfo[i].SetValue(obj, target);
             }
         }
-        
         private void Register<T>(string key, ContentInfo contentInfo)
         {
             Type type = typeof(T);
@@ -116,6 +115,16 @@ namespace Cirilla
                 return null;
 
             return contentInfo;
+        }
+
+        public ContentInfo[] GetContentInfos<T>()
+        {
+            Type matchType = typeof(T);
+
+            if (!stock.TryGetValue(matchType, out Dictionary<string, ContentInfo> contentInfos))
+                return null;
+
+            return new List<ContentInfo>(contentInfos.Values).ToArray();
         }
 
         public ContentInfo[] GetContentInfos()

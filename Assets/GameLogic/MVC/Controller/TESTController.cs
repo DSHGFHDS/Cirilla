@@ -8,11 +8,12 @@ namespace GameLogic
         [View] TestView testView;
         public TESTController()
         {
-
+             
         }
 
         public void Dispose()
         {
+            CiriDebugger.Log("TESTController Out");
         }
 
         public void Init()

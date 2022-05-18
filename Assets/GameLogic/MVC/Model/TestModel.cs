@@ -6,6 +6,7 @@ namespace GameLogic
     {
         public void Dispose()
         {
+            CiriDebugger.Log("TestModel Out");
         }
 
         public void Init()

@@ -9,11 +9,11 @@ using UnityEngine;
 
 namespace Cirilla.CEditor
 {
-    class BuildPost : IPostprocessBuildWithReport
+    class BuildPre : IPreprocessBuildWithReport
     {
         public int callbackOrder { get { return 0; } }
 
-        public void OnPostprocessBuild(BuildReport report)
+        public void OnPreprocessBuild(BuildReport report)
         {
             string dllName = $"{ EditorUtil.devPath.Substring("Assets/".Length) }.dll";
             string dllPath = Environment.CurrentDirectory.Replace("\\", "/") + $"/Library/ScriptAssemblies/{dllName}";
@@ -22,17 +22,13 @@ namespace Cirilla.CEditor
                 CiriDebugger.LogError(dllPath + "打包缺失：" + dllPath);
                 return;
             }
+
             byte[] dllBytes = File.ReadAllBytes(dllPath);
 
-            string dataPath = $"{Path.GetDirectoryName(report.summary.outputPath)}\\{Application.productName}_Data\\";
-            dllPath = $"{dataPath}StreamingAssets\\";
-            if(!Directory.Exists(dllPath))
-                Directory.CreateDirectory(dllPath);
+            if (!Directory.Exists(Application.streamingAssetsPath))
+                Directory.CreateDirectory(Application.streamingAssetsPath);
 
-            File.WriteAllBytes($"{dllPath}{dllName}", dllBytes);
-
-            dllPath = $"{dataPath}Managed\\{dllName}";
-            File.Delete(dllPath);
+            File.WriteAllBytes(Application.streamingAssetsPath + $"/{dllName}", dllBytes);
         }
     }
 }

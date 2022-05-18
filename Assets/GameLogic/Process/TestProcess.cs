@@ -8,6 +8,7 @@ namespace GameLogic
         [Controller] TESTController testController;
         [Dependency] IResModule resModule;
         [Dependency] ICSVModule csvModule;
+        [Dependency] IMVCModule mVCModule;
         #region 流程初始化与释放
         public override void Init()
         {
