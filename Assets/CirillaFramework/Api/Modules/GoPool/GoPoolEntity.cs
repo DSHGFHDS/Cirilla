@@ -7,6 +7,6 @@ namespace Cirilla
     {
         private Action<GameObject> callback;
         public void Init(Action<GameObject> callback) => this.callback = callback;
-        private void OnDestroy() => callback(gameObject);
+        private void OnDestroy() => callback?.Invoke(gameObject);
     }
 }

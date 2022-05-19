@@ -23,28 +23,31 @@ namespace Cirilla.CEditor
             ViewEntity viewEntity = target as ViewEntity;
 
             if (resultObjct != null && resultObjct != viewEntity.gameObject && resultObjct.transform.IsChildOf(viewEntity.transform) && !viewEntity.ContainGo(resultObjct))
-            {
                 viewEntity.viewIndexInfos.Add(new ViewIndexInfo(FindKey(new List<string>(viewEntity.GetKeys()), resultObjct.name), resultObjct));
-            }
 
             if (viewEntity.viewIndexInfos.Count > 0)
             {
                 EditorGUILayout.BeginVertical("HelpBox");
-                foreach (ViewIndexInfo viewIndexInfo in viewEntity.viewIndexInfos)
+                for (int i = viewEntity.viewIndexInfos.Count - 1; i >= 0; i--)
                 {
-                    EditorGUILayout.BeginHorizontal("HelpBox");
-                    string text = EditorGUILayout.TextField(viewIndexInfo.key, new[] { GUILayout.Height(20), GUILayout.Width(80) });
-                    if (text != string.Empty && text != viewIndexInfo.key && !viewEntity.ContainKey(text))
+                    if (viewEntity.viewIndexInfos[i].go == null)
                     {
-                        viewIndexInfo.key = text;
+                        viewEntity.viewIndexInfos.RemoveAt(i);
+                        continue;
+                    }
+                    EditorGUILayout.BeginHorizontal("HelpBox");
+                    string text = EditorGUILayout.TextField(viewEntity.viewIndexInfos[i].key, GUILayout.Height(20), GUILayout.Width(120));
+                    if (text != string.Empty && text != viewEntity.viewIndexInfos[i].key && !viewEntity.ContainKey(text))
+                    {
+                        viewEntity.viewIndexInfos[i].key = text;
                         break;
                     }
                     GUI.enabled = false;
-                    EditorGUILayout.ObjectField(viewIndexInfo.go, typeof(Object));
+                    EditorGUILayout.ObjectField(viewEntity.viewIndexInfos[i].go, typeof(Object));
                     GUI.enabled = true;
-                    if (GUILayout.Button("-", new[] { GUILayout.Height(20), GUILayout.Width(20) }))
+                    if (GUILayout.Button("-", GUILayout.Height(20), GUILayout.Width(20)))
                     {
-                        viewEntity.viewIndexInfos.Remove(viewIndexInfo);
+                        viewEntity.viewIndexInfos.Remove(viewEntity.viewIndexInfos[i]);
                         EditorGUILayout.EndHorizontal();
                         break;
                     }

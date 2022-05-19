@@ -158,6 +158,12 @@ namespace Cirilla
 
         public void UnLoadAsset(Object obj)
         {
+            if (obj is GameObject)
+            {
+                CiriDebugger.LogWarning("GameObject 无法单独释放");
+                return;
+            }
+
             string target = string.Empty;
             foreach (KeyValuePair<string, AssetInfo> kv in assets)
             {
@@ -172,9 +178,9 @@ namespace Cirilla
             if (target == string.Empty)
                 return;
 
-            Resources.UnloadAsset(obj);
             string bundleName = assets[target].bundleName;
             assets.Remove(target);
+            Resources.UnloadAsset(obj);
 
             if (!bundles.TryGetValue(bundleName, out AssetBundleInfo assetBundleInfo))
                 return;

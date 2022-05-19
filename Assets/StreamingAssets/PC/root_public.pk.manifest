@@ -1,22 +1,35 @@
 ManifestFileVersion: 0
-CRC: 245079179
+CRC: 263048462
 Hashes:
   AssetFileHash:
     serializedVersion: 2
-    Hash: cc07bc4e729756ca1f820871328d633a
+    Hash: 6e637b4a3ec5f22256eec9eb35eb3d27
   TypeTreeHash:
     serializedVersion: 2
-    Hash: ca023367bbf7d75ed63a68e524a6a8c6
+    Hash: bef40f72c1592bcf7f0a2bb4303cf14a
 HashAppended: 0
 ClassTypes:
+- Class: 1
+  Script: {instanceID: 0}
 - Class: 49
   Script: {instanceID: 0}
 - Class: 114
+  Script: {fileID: 11500000, guid: 0cd44c1031e13a943bb63640046fad76, type: 3}
+- Class: 114
+  Script: {fileID: 11500000, guid: ccc1976a9b4b26f4e920c5bf9e13f69d, type: 3}
+- Class: 114
+  Script: {fileID: 11500000, guid: dc42784cf147c0c48a680349fa168899, type: 3}
+- Class: 114
   Script: {fileID: 11500000, guid: b4c8052cfe90f1040b23f2992d7e7a1e, type: 3}
 - Class: 115
+  Script: {instanceID: 0}
+- Class: 223
+  Script: {instanceID: 0}
+- Class: 224
   Script: {instanceID: 0}
 SerializeReferenceClassIdentifiers: []
 Assets:
 - Assets/GameLogic/RawResources/NewConfig.asset
 - Assets/GameLogic/RawResources/NewB.txt
+- Assets/GameLogic/RawResources/UIView.prefab
 Dependencies: []

@@ -9,7 +9,7 @@ namespace Cirilla.CEditor
     {
         private const string UIView = "UIView";
 
-        [MenuItem("GameObject/CirillaView/UIView", false, -1)]
+        [MenuItem("GameObject/CirillaView/UIView")]
         private static void CreateUIView()
         {
             GameObject view = new GameObject(UIView);
