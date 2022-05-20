@@ -54,6 +54,80 @@ namespace Cirilla.CEditor
             }
         }
 
+        public static string mVCFolder
+        {
+            get
+            {
+                DevConfig devConfig = LoadAssetFromResources<DevConfig>(DevConfigAssetPath);
+                string folder = devConfig.mVCFolder;
+                UnLoadAsset(devConfig);
+                return folder != string.Empty ? folder : (mVCFolder = "MVC");
+            }
+
+            set
+            {
+                DevConfig devConfig = LoadAssetFromResources<DevConfig>(DevConfigAssetPath);
+                devConfig.mVCFolder = value;
+                SaveAsset(devConfig);
+                UnLoadAsset(devConfig);
+            }
+        }
+        public static string controllerFolder
+        {
+            get
+            {
+                DevConfig devConfig = LoadAssetFromResources<DevConfig>(DevConfigAssetPath);
+                string folder = devConfig.controllerFolder;
+                UnLoadAsset(devConfig);
+                return folder != string.Empty ? folder : (controllerFolder = "Controller");
+            }
+
+            set
+            {
+                DevConfig devConfig = LoadAssetFromResources<DevConfig>(DevConfigAssetPath);
+                devConfig.controllerFolder = value;
+                SaveAsset(devConfig);
+                UnLoadAsset(devConfig);
+            }
+        }
+        public static string modelFolder
+        {
+            get
+            {
+                DevConfig devConfig = LoadAssetFromResources<DevConfig>(DevConfigAssetPath);
+                string folder = devConfig.modelFolder;
+                UnLoadAsset(devConfig);
+                return folder != string.Empty ? folder : (modelFolder = "Model");
+            }
+
+            set
+            {
+                DevConfig devConfig = LoadAssetFromResources<DevConfig>(DevConfigAssetPath);
+                devConfig.modelFolder = value;
+                SaveAsset(devConfig);
+                UnLoadAsset(devConfig);
+            }
+        }
+
+        public static string viewFolder
+        {
+            get
+            {
+                DevConfig devConfig = LoadAssetFromResources<DevConfig>(DevConfigAssetPath);
+                string folder = devConfig.viewFolder;
+                UnLoadAsset(devConfig);
+                return folder != string.Empty ? folder : (viewFolder = "View");
+            }
+
+            set
+            {
+                DevConfig devConfig = LoadAssetFromResources<DevConfig>(DevConfigAssetPath);
+                devConfig.viewFolder = value;
+                SaveAsset(devConfig);
+                UnLoadAsset(devConfig);
+            }
+        }
+
         public static string abExtension
         {
             get

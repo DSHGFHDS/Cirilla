@@ -17,7 +17,7 @@ namespace Cirilla.CEditor
             string path;
             if (EditorUtil.devPath == string.Empty || !Directory.Exists(path = Application.dataPath + "/" + EditorUtil.devPath.Substring("Assets/".Length) + "/" + EditorUtil.resourceFolder))
             {
-                CiriDebugger.LogWarning("打包失败，请到开发配置表中进行配置！");
+                CiriDebugger.LogError("打包失败，开发目录缺失！");
                 return;
             }
 

@@ -18,6 +18,8 @@ namespace GameLogic
         #region 流程往返
         public override void OnEnter(params object[] args)
         {
+            GameObject go = resModule.LoadAsset<GameObject>("UIView.prefab");
+            ViewEntity viewEntity = go.GetComponent<ViewEntity>();
         }
         public override void OnExit()
         {

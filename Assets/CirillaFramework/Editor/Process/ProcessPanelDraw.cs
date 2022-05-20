@@ -26,9 +26,9 @@ namespace Cirilla.CEditor
         public void OnGUI()
         {
             string processTypePath;
-            if (EditorUtil.devPath == String.Empty || !Directory.Exists(processTypePath = Application.dataPath + "/" + EditorUtil.devPath.Substring("Assets/".Length)))
+            if (EditorUtil.devPath == string.Empty || !Directory.Exists(processTypePath = Application.dataPath + "/" + EditorUtil.devPath.Substring("Assets/".Length)))
             {
-                EditorGUILayout.HelpBox("请在项目配置表中设置开发目录", MessageType.Warning);
+                EditorGUILayout.HelpBox("开发目录缺失", MessageType.Error);
                 return;
             }
 

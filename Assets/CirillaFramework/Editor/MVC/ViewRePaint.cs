@@ -1,5 +1,6 @@
 ﻿
 using System.Collections.Generic;
+using System.IO;
 using UnityEditor;
 using UnityEngine;
 
@@ -12,9 +13,16 @@ namespace Cirilla.CEditor
 #pragma warning disable 0618
         public override void OnInspectorGUI()
         {
+
+            /*if (PrefabUtility.GetPrefabAssetType(target) != PrefabAssetType.NotAPrefab)
+            {
+                EditorGUILayout.HelpBox("请制作成预制体并在预制体中进行资源收集", MessageType.Warning);
+                return;
+            }*/
+
             EditorGUILayout.BeginScrollView(scrollPos);
             GameObject resultObjct = null;
-            EditorGUILayout.HelpBox("索引收集(拖取到以下框内进行添加)", MessageType.Info);
+            EditorGUILayout.HelpBox("资源收集(拖取到以下框内进行添加)", MessageType.Info);
             EditorGUILayout.BeginVertical("FrameBox");
             EditorGUILayout.BeginFadeGroup(0.45f);
             resultObjct = (GameObject)EditorGUILayout.ObjectField(resultObjct, typeof(GameObject), GUILayout.Height(150));
@@ -22,8 +30,16 @@ namespace Cirilla.CEditor
             EditorGUILayout.EndVertical();
             ViewEntity viewEntity = target as ViewEntity;
 
-            if (resultObjct != null && resultObjct != viewEntity.gameObject && resultObjct.transform.IsChildOf(viewEntity.transform) && !viewEntity.ContainGo(resultObjct))
+            PrefabInstanceStatus ins = PrefabUtility.GetPrefabInstanceStatus(viewEntity.gameObject);
+            PrefabAssetType tyee = PrefabUtility.GetPrefabAssetType(viewEntity.gameObject);
+            Object obj = PrefabUtility.GetPrefabInstanceHandle(viewEntity.gameObject);
+            string FFFF = AssetDatabase.GetAssetPath(viewEntity.gameObject);
+            bool ddad = PrefabUtility.IsPartOfAnyPrefab(viewEntity.gameObject);
+            if (resultObjct != null && resultObjct != viewEntity.gameObject && !viewEntity.ContainGo(resultObjct))
+            {
                 viewEntity.viewIndexInfos.Add(new ViewIndexInfo(FindKey(new List<string>(viewEntity.GetKeys()), resultObjct.name), resultObjct));
+                EditorUtility.SetDirty(target);
+            }
 
             if (viewEntity.viewIndexInfos.Count > 0)
             {
@@ -33,6 +49,7 @@ namespace Cirilla.CEditor
                     if (viewEntity.viewIndexInfos[i].go == null)
                     {
                         viewEntity.viewIndexInfos.RemoveAt(i);
+                        EditorUtility.SetDirty(target);
                         continue;
                     }
                     EditorGUILayout.BeginHorizontal("HelpBox");
@@ -40,6 +57,7 @@ namespace Cirilla.CEditor
                     if (text != string.Empty && text != viewEntity.viewIndexInfos[i].key && !viewEntity.ContainKey(text))
                     {
                         viewEntity.viewIndexInfos[i].key = text;
+                        EditorUtility.SetDirty(target);
                         break;
                     }
                     GUI.enabled = false;
@@ -48,6 +66,7 @@ namespace Cirilla.CEditor
                     if (GUILayout.Button("-", GUILayout.Height(20), GUILayout.Width(20)))
                     {
                         viewEntity.viewIndexInfos.Remove(viewEntity.viewIndexInfos[i]);
+                        EditorUtility.SetDirty(target);
                         EditorGUILayout.EndHorizontal();
                         break;
                     }
@@ -56,8 +75,62 @@ namespace Cirilla.CEditor
                 EditorGUILayout.EndVertical();
             }
 
+            //未来的我，你不要生气，今天我用goto真的很爽，你不要介意。
 
+            string assemblyName = EditorUtil.devPath.Substring("Assets/".Length);
+            string path;
+            if (EditorUtil.devPath == string.Empty || !Directory.Exists(path = Application.dataPath + "/" + assemblyName))
+            {
+                EditorGUILayout.HelpBox("缺失开发目录，无法生成代码", MessageType.Error);
+                goto Over;
+            }
 
+            bool mainPathExist = false;
+            string mainCodePath = path + $"/{EditorUtil.mVCFolder}/{EditorUtil.viewFolder}/{viewEntity.gameObject.name}/{viewEntity.gameObject.name}.cs";
+            string resourceCodePath = path + $"/{EditorUtil.mVCFolder}/{EditorUtil.viewFolder}/{viewEntity.gameObject.name}/{viewEntity.gameObject.name}.resource.cs";
+
+            if (!File.Exists(mainCodePath))
+                goto NodeCode;
+
+            GUI.enabled = false;
+            EditorGUILayout.BeginVertical("HelpBox");
+            string assetPath = "Assets" + mainCodePath.Split(new[] { "Assets" }, System.StringSplitOptions.None)[1];
+            MonoScript mainCodeScript = EditorUtil.LoadAsset<MonoScript>(assetPath);
+            EditorGUILayout.BeginHorizontal("HelpBox");
+            EditorGUILayout.ObjectField(mainCodeScript, typeof(MonoScript), GUILayout.Width(120), GUILayout.Height(20));
+            EditorGUILayout.TextField(assetPath, GUILayout.Height(20));
+            EditorGUILayout.EndHorizontal();
+            EditorUtil.UnLoadAsset(mainCodeScript);
+            mainPathExist = true;
+
+            if (!File.Exists(resourceCodePath))
+            {
+                EditorGUILayout.HelpBox("附件丢失，请更新代码", MessageType.Error);
+                goto CodeOver;
+            }
+
+            assetPath = "Assets" + resourceCodePath.Split(new[] { "Assets" }, System.StringSplitOptions.None)[1];
+            MonoScript resourceScript = EditorUtil.LoadAsset<MonoScript>(assetPath);
+            EditorGUILayout.BeginHorizontal("HelpBox");
+            EditorGUILayout.ObjectField(resourceScript, typeof(MonoScript), GUILayout.Width(120), GUILayout.Height(20));
+            EditorGUILayout.TextField(assetPath, GUILayout.Height(20));
+            EditorGUILayout.EndHorizontal();
+            EditorUtil.UnLoadAsset(resourceScript);
+
+            CodeOver:
+            EditorGUILayout.EndVertical();
+            GUI.enabled = true;
+
+            NodeCode:
+
+            if (GUILayout.Button(mainPathExist? "更新代码" : "生成代码", GUILayout.Height(40)))
+            {
+                if (!mainPathExist)
+                    WriteMainCode(mainCodePath, viewEntity.gameObject.name);
+                WriteResourceCode(resourceCodePath, viewEntity.gameObject.name);
+            }
+
+            Over:
             EditorGUILayout.EndScrollView();
         }
 #pragma warning restore 0618
@@ -71,6 +144,56 @@ namespace Cirilla.CEditor
                 return FindKey(keys, oriKey + $"({index + 1})", oriKey, index + 1);
             }
             return key;
+        }
+
+        private static void WriteMainCode(string path, string className)
+        {
+            string dir = Path.GetDirectoryName(path);
+            if (!Directory.Exists(dir))
+                Directory.CreateDirectory(dir);
+
+            string code =
+            "using Cirilla;" + "\n" + "\n" + 
+            $"namespace {Path.GetFileName(EditorUtil.devPath)}" + "\n" +
+            "{" + "\n" +
+            $"    public partial class {className} : {typeof(IView).Name}" + "\n" +
+            "    {" + "\n" +
+            "        #region 初始化与释放" + "\n" +
+            "        public void Init()" + "\n" +
+            "        {" + "\n" +
+            "               Load();" + "\n" +
+            "        }" + "\n" +
+            "        public void Dispose()" + "\n" +
+            "        {" + "\n" +
+            "        }" + "\n" +
+            "        #endregion" + "\n" +
+            "    }" + "\n" +
+            "}" + "\n";
+
+            Util.Write(path, code);
+            AssetDatabase.Refresh();
+        }
+
+        private static void WriteResourceCode(string path, string className)
+        {
+            string dir = Path.GetDirectoryName(path);
+            if (!Directory.Exists(dir))
+                Directory.CreateDirectory(dir);
+
+            string code =
+            "using Cirilla;" + "\n" + "\n" +
+            $"namespace {Path.GetFileName(EditorUtil.devPath)}" + "\n" +
+            "{" + "\n" +
+            $"    public partial class {className} : {typeof(IView).Name}" + "\n" +
+            "    {" + "\n" +
+            "        private void Load()" + "\n" +
+            "        {" + "\n" +
+            "        }" + "\n" +
+            "    }" + "\n" +
+            "}" + "\n";
+
+            Util.Write(path, code);
+            AssetDatabase.Refresh();
         }
     }
 }

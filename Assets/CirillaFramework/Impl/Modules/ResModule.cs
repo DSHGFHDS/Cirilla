@@ -154,16 +154,11 @@ namespace Cirilla
 
             assetBundleInfo.assetBundle.Unload(true);
             bundles.Remove(bundleName);
+            Resources.UnloadUnusedAssets();
         }
 
         public void UnLoadAsset(Object obj)
         {
-            if (obj is GameObject)
-            {
-                CiriDebugger.LogWarning("GameObject 无法单独释放");
-                return;
-            }
-
             string target = string.Empty;
             foreach (KeyValuePair<string, AssetInfo> kv in assets)
             {
@@ -180,8 +175,9 @@ namespace Cirilla
 
             string bundleName = assets[target].bundleName;
             assets.Remove(target);
+            if(!(obj is GameObject))
             Resources.UnloadAsset(obj);
-
+            
             if (!bundles.TryGetValue(bundleName, out AssetBundleInfo assetBundleInfo))
                 return;
 
@@ -193,12 +189,14 @@ namespace Cirilla
 
             assetBundleInfo.assetBundle.Unload(true);
             bundles.Remove(bundleName);
+            Resources.UnloadUnusedAssets();
         }
 
         public void Clear()
         {
             foreach(AssetInfo assetInfo in assets.Values)
-                Resources.UnloadAsset(assetInfo.obj);
+                if(!(assetInfo.obj is GameObject))
+                    Resources.UnloadAsset(assetInfo.obj);
 
             assets.Clear();
 
@@ -212,6 +210,8 @@ namespace Cirilla
                 kv.Value.assetBundle.Unload(true);
                 bundles.Remove(kv.Key);
             }
+
+            Resources.UnloadUnusedAssets();
         }
 
         private IEnumerator LoadAssetBundleAsync(string path, Action<AssetBundle> callBack)

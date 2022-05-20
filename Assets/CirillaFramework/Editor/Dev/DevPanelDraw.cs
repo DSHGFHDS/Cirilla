@@ -35,21 +35,21 @@ namespace Cirilla.CEditor
             EditorGUILayout.HelpBox("项目运行时所加载的程序集", MessageType.Info);
             EditorGUILayout.BeginHorizontal();
             string folder = string.Empty;
+            string fullFolder = EditorUtil.devPath == string.Empty ? Application.dataPath : Application.dataPath + "/" + EditorUtil.devPath.Substring("Assets/".Length);
+            if (!Directory.Exists(fullFolder))
+            {
+                EditorUtil.devPath = string.Empty;
+                fullFolder = Application.dataPath;
+            }
+
             if (GUILayout.Button("选择"))
             {
-                string fullFolder = EditorUtil.devPath == string.Empty ? Application.dataPath : Application.dataPath + "/" + EditorUtil.devPath.Substring("Assets/".Length);
-                if (!Directory.Exists(fullFolder))
-                {
-                    EditorUtil.devPath = string.Empty;
-                    fullFolder = Application.dataPath;
-                }
-
                 fullFolder = EditorUtility.OpenFolderPanel("选择项目开发目录", fullFolder, "");
                 if (fullFolder == string.Empty)
                     goto endHorizontal;
 
                 if (!fullFolder.Contains("Assets") || fullFolder.Contains("Editor") || fullFolder.Contains("Plugins") || fullFolder.Contains("Resources") || fullFolder.Contains("StreamingAssets")
-                     || fullFolder.Contains("Gizmos") || fullFolder.Contains("Editor Default Resources") || fullFolder.Contains("CirillaFramework"))
+                     || fullFolder.Contains("Gizmos") || fullFolder.Contains("Editor Default Resources") || fullFolder.Contains("CirillaFramework") || fullFolder.Contains(EditorUtil.resourceFolder) || Path.GetDirectoryName(fullFolder).Replace("\\", "/") != Application.dataPath)
                 {
                     CiriDebugger.LogError("不支持设置该目录为开发目录");
                     goto endHorizontal;

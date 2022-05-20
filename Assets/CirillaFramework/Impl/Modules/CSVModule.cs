@@ -64,7 +64,7 @@ namespace Cirilla
 
             for (int i = 0; i < props.Length; i++)
             {
-                if (props[i].Name == keys[i])
+                if (props[i].Name == keys[i].Replace("\r", ""))
                     continue;
 
                 CiriDebugger.LogError("类型不匹配:" + type.Name);
