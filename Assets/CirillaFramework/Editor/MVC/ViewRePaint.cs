@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using UnityEditor;
+using UnityEditor.Experimental.SceneManagement;
 using UnityEngine;
 
 namespace Cirilla.CEditor
@@ -30,11 +31,10 @@ namespace Cirilla.CEditor
             EditorGUILayout.EndVertical();
             ViewEntity viewEntity = target as ViewEntity;
 
-            PrefabInstanceStatus ins = PrefabUtility.GetPrefabInstanceStatus(viewEntity.gameObject);
-            PrefabAssetType tyee = PrefabUtility.GetPrefabAssetType(viewEntity.gameObject);
-            Object obj = PrefabUtility.GetPrefabInstanceHandle(viewEntity.gameObject);
-            string FFFF = AssetDatabase.GetAssetPath(viewEntity.gameObject);
-            bool ddad = PrefabUtility.IsPartOfAnyPrefab(viewEntity.gameObject);
+
+            //string dasd = PrefabStageUtility.GetPrefabStage(viewEntity.gameObject).assetPath;
+            //string  = AssetDatabase.GetAssetPath(viewEntity.gameObject);
+
             if (resultObjct != null && resultObjct != viewEntity.gameObject && !viewEntity.ContainGo(resultObjct))
             {
                 viewEntity.viewIndexInfos.Add(new ViewIndexInfo(FindKey(new List<string>(viewEntity.GetKeys()), resultObjct.name), resultObjct));

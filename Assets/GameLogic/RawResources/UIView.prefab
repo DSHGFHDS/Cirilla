@@ -51,7 +51,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ccc1976a9b4b26f4e920c5bf9e13f69d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  viewIndexInfos: []
+  viewIndexInfos:
+  - key: GameObject
+    go: {fileID: 0}
 --- !u!223 &1618228264021515032
 Canvas:
   m_ObjectHideFlags: 0
