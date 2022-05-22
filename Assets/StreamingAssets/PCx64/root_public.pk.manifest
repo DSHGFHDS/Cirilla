@@ -1,0 +1,22 @@
+ManifestFileVersion: 0
+CRC: 928730486
+Hashes:
+  AssetFileHash:
+    serializedVersion: 2
+    Hash: 40bbaf3dd51d205df83cca20f601f924
+  TypeTreeHash:
+    serializedVersion: 2
+    Hash: 2431a34e8a5ec87d023c048bbef6ae77
+HashAppended: 0
+ClassTypes:
+- Class: 49
+  Script: {instanceID: 0}
+- Class: 114
+  Script: {fileID: 11500000, guid: 6e6b2e4538ccca94385d638bfe81f0f0, type: 3}
+- Class: 115
+  Script: {instanceID: 0}
+SerializeReferenceClassIdentifiers: []
+Assets:
+- Assets/GameLogic/RawResources/NewConfig.asset
+- Assets/GameLogic/RawResources/NewB.txt
+Dependencies: []

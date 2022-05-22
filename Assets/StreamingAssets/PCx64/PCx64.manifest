@@ -1,0 +1,16 @@
+ManifestFileVersion: 0
+CRC: 575298754
+AssetBundleManifest:
+  AssetBundleInfos:
+    Info_0:
+      Name: root_public.pk
+      Dependencies: {}
+    Info_1:
+      Name: 1794052274_public.pk
+      Dependencies: {}
+    Info_2:
+      Name: -1517437366.pk
+      Dependencies: {}
+    Info_3:
+      Name: -825393201_custom.pk
+      Dependencies: {}

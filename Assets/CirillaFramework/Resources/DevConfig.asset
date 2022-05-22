@@ -9,11 +9,15 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: b5ce4bc30e927784aa5b781123b68e78, type: 3}
+  m_Script: {fileID: 11500000, guid: b9643947ae9027b4fb28fc685741f548, type: 3}
   m_Name: DevConfig
   m_EditorClassIdentifier: 
-  runtimePlatform: 1
+  runtimePlatform: 0
   projectPath: Assets/GameLogic
+  mVCFolder: MVC
+  controllerFolder: Controller
+  modelFolder: Model
+  viewFolder: View
   assetBundleExtension: .pk
   resourcesFolder: RawResources
   preLoadExt: _public

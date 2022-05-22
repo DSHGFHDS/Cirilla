@@ -14,12 +14,18 @@ namespace Cirilla.CEditor
 #pragma warning disable 0618
         public override void OnInspectorGUI()
         {
+            ViewEntity viewEntity = target as ViewEntity;
 
-            /*if (PrefabUtility.GetPrefabAssetType(target) != PrefabAssetType.NotAPrefab)
+            string prefabPath = AssetDatabase.GetAssetPath(viewEntity.gameObject);
+            if (prefabPath == null)
+                prefabPath = PrefabStageUtility.GetPrefabStage(viewEntity.gameObject)?.assetPath;
+
+
+            if (prefabPath == string.Empty)
             {
                 EditorGUILayout.HelpBox("请制作成预制体并在预制体中进行资源收集", MessageType.Warning);
                 return;
-            }*/
+            }
 
             EditorGUILayout.BeginScrollView(scrollPos);
             GameObject resultObjct = null;
@@ -29,7 +35,7 @@ namespace Cirilla.CEditor
             resultObjct = (GameObject)EditorGUILayout.ObjectField(resultObjct, typeof(GameObject), GUILayout.Height(150));
             EditorGUILayout.EndFadeGroup();
             EditorGUILayout.EndVertical();
-            ViewEntity viewEntity = target as ViewEntity;
+
 
 
             //string dasd = PrefabStageUtility.GetPrefabStage(viewEntity.gameObject).assetPath;
@@ -74,8 +80,6 @@ namespace Cirilla.CEditor
                 }
                 EditorGUILayout.EndVertical();
             }
-
-            //未来的我，你不要生气，今天我用goto真的很爽，你不要介意。
 
             string assemblyName = EditorUtil.devPath.Substring("Assets/".Length);
             string path;
