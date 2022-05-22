@@ -54,10 +54,10 @@ namespace Cirilla
                           switch (result.MessageType)
                           {
                               case WebSocketMessageType.Binary:
-                                  CirillaCore.Push(Received, bytes);
+                                  Core.Push(Received, bytes);
                                   break;
                               case WebSocketMessageType.Text:
-                                  CirillaCore.Push(Received, System.Text.Encoding.UTF8.GetString(bytes));
+                                  Core.Push(Received, System.Text.Encoding.UTF8.GetString(bytes));
                                   break;
                               case WebSocketMessageType.Close:
                                   if (result.CloseStatusDescription == normalClosureKey)

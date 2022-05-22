@@ -49,7 +49,7 @@ namespace Cirilla
                 {
                     byte[] buffer = new byte[bufferLen];
                     while (socket.Receive(buffer) > 0) {
-                        CirillaCore.Push(Received, buffer);
+                        Core.Push(Received, buffer);
                     }
                 }
                 catch {

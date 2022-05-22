@@ -10,24 +10,25 @@ namespace Cirilla.CEditor
     [CustomEditor(typeof(ViewEntity))]
     public class ViewRePaint : Editor
     {
-        private Vector2 scrollPos;
+        private const string bindedPathName = "bindedPath";
+        private const string resModuleName = "resModule";
+        private const string codeViewPrefabName = "viewPrefab";
+        private const string codeViewGameObjectName = "viewGameObjcet";
+        private const string viewEntityName = "viewEntity";
+
 #pragma warning disable 0618
         public override void OnInspectorGUI()
         {
-            ViewEntity viewEntity = target as ViewEntity;
-
-            string prefabPath = AssetDatabase.GetAssetPath(viewEntity.gameObject);
-            if (prefabPath == null)
-                prefabPath = PrefabStageUtility.GetPrefabStage(viewEntity.gameObject)?.assetPath;
-
+            ViewEntity viewEntity = (ViewEntity)target;
+            GameObject prefabObject = viewEntity.gameObject;
+            string prefabPath = PrefabStageUtility.GetPrefabStage(prefabObject)?.assetPath??AssetDatabase.GetAssetPath(prefabObject);
 
             if (prefabPath == string.Empty)
             {
-                EditorGUILayout.HelpBox("请制作成预制体并在预制体中进行资源收集", MessageType.Warning);
+                EditorGUILayout.HelpBox("请在预制体中进行资源收集", MessageType.Warning);
                 return;
             }
 
-            EditorGUILayout.BeginScrollView(scrollPos);
             GameObject resultObjct = null;
             EditorGUILayout.HelpBox("资源收集(拖取到以下框内进行添加)", MessageType.Info);
             EditorGUILayout.BeginVertical("FrameBox");
@@ -35,11 +36,6 @@ namespace Cirilla.CEditor
             resultObjct = (GameObject)EditorGUILayout.ObjectField(resultObjct, typeof(GameObject), GUILayout.Height(150));
             EditorGUILayout.EndFadeGroup();
             EditorGUILayout.EndVertical();
-
-
-
-            //string dasd = PrefabStageUtility.GetPrefabStage(viewEntity.gameObject).assetPath;
-            //string  = AssetDatabase.GetAssetPath(viewEntity.gameObject);
 
             if (resultObjct != null && resultObjct != viewEntity.gameObject && !viewEntity.ContainGo(resultObjct))
             {
@@ -60,7 +56,8 @@ namespace Cirilla.CEditor
                     }
                     EditorGUILayout.BeginHorizontal("HelpBox");
                     string text = EditorGUILayout.TextField(viewEntity.viewIndexInfos[i].key, GUILayout.Height(20), GUILayout.Width(120));
-                    if (text != string.Empty && text != viewEntity.viewIndexInfos[i].key && !viewEntity.ContainKey(text))
+                    if (text != string.Empty && text != viewEntity.viewIndexInfos[i].key && !viewEntity.ContainKey(text) && Util.IsMatchStatementRule(text)
+                        && text != bindedPathName && text != resModuleName && text != codeViewPrefabName && text != codeViewGameObjectName && text != viewEntityName)
                     {
                         viewEntity.viewIndexInfos[i].key = text;
                         EditorUtility.SetDirty(target);
@@ -86,67 +83,77 @@ namespace Cirilla.CEditor
             if (EditorUtil.devPath == string.Empty || !Directory.Exists(path = Application.dataPath + "/" + assemblyName))
             {
                 EditorGUILayout.HelpBox("缺失开发目录，无法生成代码", MessageType.Error);
-                goto Over;
+                return;
             }
 
-            bool mainPathExist = false;
-            string mainCodePath = path + $"/{EditorUtil.mVCFolder}/{EditorUtil.viewFolder}/{viewEntity.gameObject.name}/{viewEntity.gameObject.name}.cs";
-            string resourceCodePath = path + $"/{EditorUtil.mVCFolder}/{EditorUtil.viewFolder}/{viewEntity.gameObject.name}/{viewEntity.gameObject.name}.resource.cs";
+            bool codeExist = false;
+            string resourceCodePath = path + $"/{EditorUtil.mVCFolder}/{EditorUtil.viewFolder}/{prefabObject.name}/{prefabObject.name}.resource.cs";
+            string mainCodePath = path + $"/{EditorUtil.mVCFolder}/{EditorUtil.viewFolder}/{prefabObject.name}/{prefabObject.name}.cs";
+            string resPath = prefabPath.Split(new[] { EditorUtil.resourceFolder + "/" }, System.StringSplitOptions.None)[1];
 
-            if (!File.Exists(mainCodePath))
+            if (!File.Exists(resourceCodePath) || !File.Exists(mainCodePath))
                 goto NodeCode;
 
-            GUI.enabled = false;
-            EditorGUILayout.BeginVertical("HelpBox");
-            string assetPath = "Assets" + mainCodePath.Split(new[] { "Assets" }, System.StringSplitOptions.None)[1];
-            MonoScript mainCodeScript = EditorUtil.LoadAsset<MonoScript>(assetPath);
-            EditorGUILayout.BeginHorizontal("HelpBox");
-            EditorGUILayout.ObjectField(mainCodeScript, typeof(MonoScript), GUILayout.Width(120), GUILayout.Height(20));
-            EditorGUILayout.TextField(assetPath, GUILayout.Height(20));
-            EditorGUILayout.EndHorizontal();
-            EditorUtil.UnLoadAsset(mainCodeScript);
-            mainPathExist = true;
-
-            if (!File.Exists(resourceCodePath))
+            string assetPath = "Assets" + resourceCodePath.Split(new[] { "Assets" }, System.StringSplitOptions.None)[1];
+            MonoScript monoScript = EditorUtil.LoadAsset<MonoScript>(assetPath);
+            if (!monoScript.text.Replace(" ", "").Contains($"bindedPath=\"{resPath}\""))
             {
-                EditorGUILayout.HelpBox("附件丢失，请更新代码", MessageType.Error);
-                goto CodeOver;
+                EditorUtil.UnLoadAsset(monoScript);
+                EditorGUILayout.HelpBox("预制体重名冲突，无法生成代码:\n" + assetPath, MessageType.Error);
+                return;
             }
 
-            assetPath = "Assets" + resourceCodePath.Split(new[] { "Assets" }, System.StringSplitOptions.None)[1];
-            MonoScript resourceScript = EditorUtil.LoadAsset<MonoScript>(assetPath);
+            codeExist = true;
+            EditorGUILayout.BeginVertical("HelpBox");
+            GUI.enabled = false;
             EditorGUILayout.BeginHorizontal("HelpBox");
-            EditorGUILayout.ObjectField(resourceScript, typeof(MonoScript), GUILayout.Width(120), GUILayout.Height(20));
+            EditorGUILayout.ObjectField(monoScript, typeof(MonoScript), GUILayout.Width(120), GUILayout.Height(20));
             EditorGUILayout.TextField(assetPath, GUILayout.Height(20));
             EditorGUILayout.EndHorizontal();
-            EditorUtil.UnLoadAsset(resourceScript);
+            EditorUtil.UnLoadAsset(monoScript);
 
-            CodeOver:
-            EditorGUILayout.EndVertical();
+            assetPath = "Assets" + mainCodePath.Split(new[] { "Assets" }, System.StringSplitOptions.None)[1];
+            monoScript = EditorUtil.LoadAsset<MonoScript>(assetPath);
+            EditorGUILayout.BeginHorizontal("HelpBox");
+            EditorGUILayout.ObjectField(monoScript, typeof(MonoScript), GUILayout.Width(120), GUILayout.Height(20));
+            EditorGUILayout.TextField(assetPath, GUILayout.Height(20));
+            EditorGUILayout.EndHorizontal();
+            EditorUtil.UnLoadAsset(monoScript);
             GUI.enabled = true;
+            EditorGUILayout.EndVertical();
+
+            if (GUILayout.Button("清理代码", "flow node hex 6", GUILayout.Width(EditorGUIUtility.currentViewWidth-40), GUILayout.Height(40)))
+            {
+                string deleteDir = Path.GetDirectoryName(mainCodePath);
+                Directory.Delete(deleteDir, true);
+                File.Delete(deleteDir + ".meta");
+                AssetDatabase.Refresh();
+            }
 
             NodeCode:
-
-            if (GUILayout.Button(mainPathExist? "更新代码" : "生成代码", GUILayout.Height(40)))
+            if (GUILayout.Button(codeExist? "更新代码" : "生成代码", codeExist ? "flow node hex 1": "flow node hex 3", GUILayout.Width(EditorGUIUtility.currentViewWidth - 40), GUILayout.Height(40)))
             {
-                if (!mainPathExist)
-                    WriteMainCode(mainCodePath, viewEntity.gameObject.name);
-                WriteResourceCode(resourceCodePath, viewEntity.gameObject.name);
+                if (!codeExist)
+                    WriteMainCode(mainCodePath, prefabObject.name);
+                WriteResourceCode(resourceCodePath, resPath, viewEntity, prefabObject.name);
             }
-
-            Over:
-            EditorGUILayout.EndScrollView();
         }
+
 #pragma warning restore 0618
 
         private static string FindKey(List<string> keys, string key, string oriKey = "", int index = 0)
         {
+            if (!Util.IsMatchStatementRule(key))
+                key = "key";
+            else key = key.ToLower()[0] + key.Substring(1);
+
             if (keys.Contains(key))
             {
                 if(oriKey == string.Empty)
                     oriKey = key;
-                return FindKey(keys, oriKey + $"({index + 1})", oriKey, index + 1);
+                return FindKey(keys, oriKey + $"_{index + 1}", oriKey, index + 1);
             }
+
             return key;
         }
 
@@ -163,11 +170,10 @@ namespace Cirilla.CEditor
             $"    public partial class {className} : {typeof(IView).Name}" + "\n" +
             "    {" + "\n" +
             "        #region 初始化与释放" + "\n" +
-            "        public void Init()" + "\n" +
+            "        public void VeiwInit()" + "\n" +
             "        {" + "\n" +
-            "               Load();" + "\n" +
             "        }" + "\n" +
-            "        public void Dispose()" + "\n" +
+            "        public void VeiwDispose()" + "\n" +
             "        {" + "\n" +
             "        }" + "\n" +
             "        #endregion" + "\n" +
@@ -178,20 +184,53 @@ namespace Cirilla.CEditor
             AssetDatabase.Refresh();
         }
 
-        private static void WriteResourceCode(string path, string className)
+        private static void WriteResourceCode(string path, string resPath, ViewEntity viewEntity, string className)
         {
             string dir = Path.GetDirectoryName(path);
             if (!Directory.Exists(dir))
                 Directory.CreateDirectory(dir);
-
+            string gameObjectName = typeof(GameObject).Name;
             string code =
-            "using Cirilla;" + "\n" + "\n" +
+            "using Cirilla;" + "\n" +
+            "using UnityEngine;" + "\n" + "\n" +
             $"namespace {Path.GetFileName(EditorUtil.devPath)}" + "\n" +
             "{" + "\n" +
             $"    public partial class {className} : {typeof(IView).Name}" + "\n" +
             "    {" + "\n" +
-            "        private void Load()" + "\n" +
+            $"        private const string {bindedPathName} = \"{resPath}\";" + "\n" + "\n" +
+            $"        [{typeof(DependencyAttribute).Name}] {typeof(IResModule).Name} {resModuleName};" + "\n" + "\n" +
+            $"        private {gameObjectName} {codeViewPrefabName};" + "\n" +
+            $"        private {gameObjectName} {codeViewGameObjectName};" + "\n" + "\n";
+            foreach (ViewIndexInfo viewIndexInfo in viewEntity.viewIndexInfos) 
+                code += $"        private {gameObjectName} {viewIndexInfo.key};" + "\n";
+
+            code +=
+            "        public void Init()" + "\n" +
             "        {" + "\n" +
+            $"            {codeViewPrefabName} = {resModuleName}.LoadAsset<{gameObjectName}>({bindedPathName});" + "\n" +
+            $"            if({codeViewPrefabName} == null)" + "\n" +
+            "            {" + "\n" +
+            $"                CiriDebugger.LogError(\"{className}加载失效\");" + "\n" +
+            "                return;" + "\n" +
+            "            }" + "\n" +
+            $"            {codeViewGameObjectName} = {gameObjectName}.Instantiate<{gameObjectName}>({codeViewPrefabName});" + "\n";
+
+            if(viewEntity.viewIndexInfos.Count > 0)
+                code += $"            {typeof(ViewEntity).Name} {viewEntityName} = {codeViewGameObjectName}.GetComponent<{typeof(ViewEntity).Name}>();" + "\n";
+
+            foreach (ViewIndexInfo viewIndexInfo in viewEntity.viewIndexInfos)
+                code += $"            {viewIndexInfo.key} = {viewEntityName}.GetGo(\"{viewIndexInfo.key}\");" + "\n";
+
+            code +=
+            "            VeiwInit();" + "\n" +
+            "        }" + "\n" +
+            "        public void Dispose()" + "\n" +
+            "        {" + "\n" +
+            $"            if({codeViewPrefabName} == null)" + "\n" +
+            "                return;" + "\n" +
+            $"            {gameObjectName}.Destroy({codeViewGameObjectName});" + "\n" +
+            $"            {resModuleName}.UnLoadAsset({codeViewPrefabName});" + "\n" +
+            "            VeiwDispose();" + "\n" +
             "        }" + "\n" +
             "    }" + "\n" +
             "}" + "\n";

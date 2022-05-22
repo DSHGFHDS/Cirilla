@@ -1,5 +1,5 @@
-﻿using System;
-using System.Text;
+﻿using System.Text;
+using System.Text.RegularExpressions;
 
 namespace Cirilla
 {
@@ -24,6 +24,18 @@ namespace Cirilla
                 }
                 return true;
             }
+            return true;
+        }
+
+        public static bool IsMatchStatementRule(string str)
+        {
+            if (str[0] >= 0 && str[0] <= 57)
+                return false;
+
+            Regex regExp = new Regex("[ \\[ \\] \\^ \\-*×――(^)$%~!＠@＃#$…&%￥—+=<>《》!！??？:：•`·、。，；,.;/\'\"{}（）‘’“”-]");
+            if (regExp.IsMatch(str))
+                return false;
+
             return true;
         }
     }

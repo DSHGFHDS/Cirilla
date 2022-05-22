@@ -9,7 +9,7 @@ using UnityEngine;
 
 namespace Cirilla
 {
-    public sealed partial class CirillaCore
+    public sealed partial class Core
     {
         private ConcurrentQueue<MessageInfo> messageQueue;
         private IProcess runningProcess { get; set; }

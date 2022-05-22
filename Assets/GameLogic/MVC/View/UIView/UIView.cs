@@ -5,11 +5,10 @@ namespace GameLogic
     public partial class UIView : IView
     {
         #region 初始化与释放
-        public void Init()
+        public void VeiwInit()
         {
-               Load();
         }
-        public void Dispose()
+        public void VeiwDispose()
         {
         }
         #endregion

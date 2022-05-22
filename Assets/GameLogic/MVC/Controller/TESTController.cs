@@ -6,6 +6,7 @@ namespace GameLogic
     {
         [Model] TestModel testModel;
         [View] TestView testView;
+        [View] UIView uIView;
         public TESTController()
         {
              

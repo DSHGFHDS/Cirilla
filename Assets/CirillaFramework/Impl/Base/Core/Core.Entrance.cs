@@ -4,12 +4,12 @@ using UnityEngine.EventSystems;
 
 namespace Cirilla
 {
-    public sealed partial class CirillaCore : MonoBehaviour
+    public sealed partial class Core : MonoBehaviour
     {
         private const string rootName = "CirillaRoot";
         private static GameObject rootGo;
         private static IContainer containerIns;
-        private static CirillaCore Runtime;
+        private static Core Runtime;
 
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
         private static void Init()
@@ -19,13 +19,13 @@ namespace Cirilla
                 rootGo = new GameObject(rootName);
                 rootGo.AddComponent<EventSystem>();
                 rootGo.AddComponent<StandaloneInputModule>();
-                Runtime = rootGo.AddComponent<CirillaCore>();
+                Runtime = rootGo.AddComponent<Core>();
                 containerIns = IocContainer.instance;
                 Runtime.RegisterModule();
                 return;
             }
 
-            Runtime = rootGo.GetComponent<CirillaCore>();
+            Runtime = rootGo.GetComponent<Core>();
         }
 
         private void Awake() => DontDestroyOnLoad(rootGo);

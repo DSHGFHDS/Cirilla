@@ -49,7 +49,7 @@ namespace Cirilla
             {
                 if (bundleName.EndsWith(Util.customLoadExt))
                 {
-                    CiriDebugger.LogError("该资源在custom包中，需要先预载包体:" + path.Replace("/" + Path.GetFileName(path), ""));
+                    CiriDebugger.LogError($"资源:{path}在custom包中，需要先预载包体:" + path.Replace("/" + Path.GetFileName(path), ""));
                     return null;
                 }
 
@@ -85,21 +85,21 @@ namespace Cirilla
 
             if (bundles.TryGetValue(bundleName, out AssetBundleInfo assetBundleInfo))
             {
-                CirillaCore.StartCoroutine(LoadAssetAsync(assetBundleInfo.assetBundle, path, (obj) => { callBack((T)obj); assets.Add(path, new AssetInfo(obj, bundleName)); assetBundleInfo.assetLoaded ++; }));
+                Core.StartCoroutine(LoadAssetAsync(assetBundleInfo.assetBundle, path, (obj) => { callBack((T)obj); assets.Add(path, new AssetInfo(obj, bundleName)); assetBundleInfo.assetLoaded ++; }));
                 return;
             }
 
             if (bundleName.EndsWith(Util.customLoadExt))
             {
-                CiriDebugger.LogError("该资源在custom包中，需要先预载包体:" + path.Replace("/" + Path.GetFileName(path), ""));
+                CiriDebugger.LogError($"资源:{path}在custom包中，需要先预载包体:" + path.Replace("/" + Path.GetFileName(path), ""));
                 return;
             }
 
-            CirillaCore.StartCoroutine(LoadAssetBundleAsync(resourcesPath + "/" + bundleName + Util.abExtension, (assetBundle)=>
+            Core.StartCoroutine(LoadAssetBundleAsync(resourcesPath + "/" + bundleName + Util.abExtension, (assetBundle)=>
             {
                 assetBundleInfo = new AssetBundleInfo(assetBundle);
                 bundles.Add(bundleName, assetBundleInfo);
-                CirillaCore.StartCoroutine(LoadAssetAsync(assetBundle, path, (obj) => { callBack((T)obj); assets.Add(path, new AssetInfo(obj, bundleName)); assetBundleInfo.assetLoaded ++; }));
+                Core.StartCoroutine(LoadAssetAsync(assetBundle, path, (obj) => { callBack((T)obj); assets.Add(path, new AssetInfo(obj, bundleName)); assetBundleInfo.assetLoaded ++; }));
             }));
         }
 
@@ -127,7 +127,7 @@ namespace Cirilla
             if (bundles.ContainsKey(bundleName))
                 return;
 
-            CirillaCore.StartCoroutine(LoadAssetBundleAsync(resourcesPath + "/" + bundleName + Util.abExtension, (assetBundle) => {
+            Core.StartCoroutine(LoadAssetBundleAsync(resourcesPath + "/" + bundleName + Util.abExtension, (assetBundle) => {
                 bundles.Add(bundleName, new AssetBundleInfo(assetBundle));
             }));
         }

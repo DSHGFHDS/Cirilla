@@ -38,34 +38,29 @@ namespace Cirilla
             return false;
         }
 
-        public bool TryGetGo(string key, out GameObject go)
+        public GameObject GetGo(string key)
         {
             foreach (ViewIndexInfo viewIndexInfo in viewIndexInfos)
             {
                 if (viewIndexInfo.key != key)
                     continue;
 
-                go = viewIndexInfo.go;
-
-                return true;
+                return viewIndexInfo.go;
             }
-            go = null;
-            return false;
+            return null;
         }
 
-        public bool TryGetKey(GameObject go, out string key)
+        public string GetKey(GameObject go)
         {
             foreach (ViewIndexInfo viewIndexInfo in viewIndexInfos)
             {
                 if (viewIndexInfo.go != go)
                     continue;
 
-                key = viewIndexInfo.key;
-
-                return true;
+                return viewIndexInfo.key;
             }
-            key = string.Empty;
-            return false;
+
+            return null;
         }
 
         public string[] GetKeys()
