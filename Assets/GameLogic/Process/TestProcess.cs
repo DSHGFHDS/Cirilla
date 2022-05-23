@@ -5,11 +5,17 @@ namespace GameLogic
 {
     public class TestProcess : AProcessBase
     {
-        [Controller] TESTController testController;
+        #region 模块
         [Dependency] IResModule resModule;
         [Dependency] ICSVModule csvModule;
         [Dependency] IMVCModule mVCModule;
         [Dependency] IGoPoolModule goPoolModule;
+        #endregion
+
+        #region Controller
+        [Controller] TestController testController;
+        #endregion
+
         #region 流程初始化与释放
         public override void Init()
         {

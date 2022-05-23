@@ -9,7 +9,7 @@ namespace Cirilla.CEditor
         private string search = "";
         private GUIStyle textStyle;
 
-        [MenuItem("Cirilla/GUIStyle查看器", false, 1)]
+        [MenuItem("Cirilla/工具/GUIStyle查看器", false, 1)]
         private static void OpenStyleViewer() => GetWindow<GUIStyleViewer>(false, "GUIStyle查看器");
         private void OnGUI()
         {

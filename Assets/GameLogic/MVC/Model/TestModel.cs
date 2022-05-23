@@ -11,7 +11,7 @@ namespace GameLogic
 
         public void Init()
         {
-            CiriDebugger.Log("TestModel");
+            CiriDebugger.Log("TestModel In");
         }
     }
 }

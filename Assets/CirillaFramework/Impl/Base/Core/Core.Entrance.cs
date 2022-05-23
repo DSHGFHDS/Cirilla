@@ -14,18 +14,12 @@ namespace Cirilla
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
         private static void Init()
         {
-            if((rootGo = GameObject.Find(rootName)) == null)
-            {
-                rootGo = new GameObject(rootName);
-                rootGo.AddComponent<EventSystem>();
-                rootGo.AddComponent<StandaloneInputModule>();
-                Runtime = rootGo.AddComponent<Core>();
-                containerIns = IocContainer.instance;
-                Runtime.RegisterModule();
-                return;
-            }
-
-            Runtime = rootGo.GetComponent<Core>();
+            rootGo = new GameObject(rootName);
+            rootGo.AddComponent<EventSystem>();
+            rootGo.AddComponent<StandaloneInputModule>();
+            Runtime = rootGo.AddComponent<Core>();
+            containerIns = IocContainer.instance;
+            Runtime.RegisterModule();
         }
 
         private void Awake() => DontDestroyOnLoad(rootGo);

@@ -9,14 +9,18 @@ namespace Cirilla
 {
     public class ResModule : IResModule
     {
-        private static readonly string resourcesPath = Application.streamingAssetsPath + "/" + Util.platform;
+        private static readonly string resourcesPath = Application.streamingAssetsPath + "/" + Util.buildResourcesFolder;
 
         private Dictionary<string, AssetInfo> assets;
         private Dictionary<string, AssetBundleInfo> bundles;
+
         public ResModule()
         {
-            AssetBundle.UnloadAllAssetBundles(true);
             assets = new Dictionary<string, AssetInfo>();
+#if UNITY_EDITOR
+            if (Util.lazyLoad)
+                return;
+#endif
             bundles = new Dictionary<string, AssetBundleInfo>();
             if (!Directory.Exists(resourcesPath))
                 return;
@@ -35,10 +39,15 @@ namespace Cirilla
                 AssetBundle assetBundle = AssetBundle.LoadFromFile(fileInfo.FullName);
                 bundles.Add(bundleName, new AssetBundleInfo(assetBundle));
             }
+
         }
 
         public T LoadAsset<T>(string path) where T : Object
         {
+#if UNITY_EDITOR
+            if (Util.lazyLoad)
+                return LazyLoadAsset<T>(path);
+#endif
             path = path.Replace('\\', '/').ToLower();
             if (assets.TryGetValue(path, out AssetInfo assetInfo))
                 return (T)assetInfo.obj;
@@ -50,6 +59,13 @@ namespace Cirilla
                 if (bundleName.EndsWith(Util.customLoadExt))
                 {
                     CiriDebugger.LogError($"资源:{path}在custom包中，需要先预载包体:" + path.Replace("/" + Path.GetFileName(path), ""));
+                    return null;
+                }
+
+                string loadPath = resourcesPath + "/" + bundleName + Util.abExtension;
+                if (!File.Exists(loadPath))
+                {
+                    CiriDebugger.LogError($"资源:{path}所在包体不存在");
                     return null;
                 }
 
@@ -74,6 +90,13 @@ namespace Cirilla
 
         public void LoadAssetAsync<T>(string path, Action<T> callBack) where T : Object
         {
+#if UNITY_EDITOR
+            if (Util.lazyLoad)
+            {
+                LazyLoadAssetAsync<T>(path, callBack);
+                return;
+            }
+#endif
             path = path.Replace('\\', '/').ToLower();
             if (assets.TryGetValue(path, out AssetInfo assetInfo))
             {
@@ -95,16 +118,31 @@ namespace Cirilla
                 return;
             }
 
-            Core.StartCoroutine(LoadAssetBundleAsync(resourcesPath + "/" + bundleName + Util.abExtension, (assetBundle)=>
+            string loadPath = resourcesPath + "/" + bundleName + Util.abExtension;
+            if (!File.Exists(loadPath))
+            {
+                CiriDebugger.LogError($"资源:{path}所在包体不存在");
+                return;
+            }
+
+            Core.StartCoroutine(LoadAssetBundleAsync(loadPath, (assetBundle)=>
             {
                 assetBundleInfo = new AssetBundleInfo(assetBundle);
                 bundles.Add(bundleName, assetBundleInfo);
                 Core.StartCoroutine(LoadAssetAsync(assetBundle, path, (obj) => { callBack((T)obj); assets.Add(path, new AssetInfo(obj, bundleName)); assetBundleInfo.assetLoaded ++; }));
             }));
+
         }
 
         public void LoadCustom(string path)
         {
+#if UNITY_EDITOR
+            if (Util.lazyLoad)
+            {
+                CiriDebugger.Log($"目前是懒加载模式,Custom包{path}被暂时搁置");
+                return;
+            }
+#endif
             path = path.Replace('\\', '/').ToLower();
             if (!path.EndsWith(Util.customLoadExt))
                 return;
@@ -114,10 +152,24 @@ namespace Cirilla
             if (bundles.ContainsKey(bundleName))
                 return;
 
-            bundles.Add(bundleName, new AssetBundleInfo(AssetBundle.LoadFromFile(resourcesPath + "/" + bundleName + Util.abExtension)));
+            string loadPath = resourcesPath + "/" + bundleName + Util.abExtension;
+            if (!File.Exists(loadPath))
+            {
+                CiriDebugger.LogError($"资源:{path}所在包体不存在");
+                return;
+            }
+
+            bundles.Add(bundleName, new AssetBundleInfo(AssetBundle.LoadFromFile(loadPath)));
         }
         public void LoadCustomAsync(string path)
         {
+#if UNITY_EDITOR
+            if (Util.lazyLoad)
+            {
+                CiriDebugger.Log($"目前是懒加载模式,Custom包{path}被暂时搁置");
+                return;
+            }
+#endif
             path = path.Replace('\\', '/').ToLower();
             if (!path.EndsWith(Util.customLoadExt))
                 return;
@@ -127,13 +179,24 @@ namespace Cirilla
             if (bundles.ContainsKey(bundleName))
                 return;
 
-            Core.StartCoroutine(LoadAssetBundleAsync(resourcesPath + "/" + bundleName + Util.abExtension, (assetBundle) => {
+            string loadPath = resourcesPath + "/" + bundleName + Util.abExtension;
+            if (!File.Exists(loadPath))
+            {
+                CiriDebugger.LogError($"资源:{path}所在包体不存在");
+                return;
+            }
+
+            Core.StartCoroutine(LoadAssetBundleAsync(loadPath, (assetBundle) => {
                 bundles.Add(bundleName, new AssetBundleInfo(assetBundle));
             }));
         }
 
         public void UnLoadCustom(string path)
         {
+#if UNITY_EDITOR
+            if (Util.lazyLoad)
+                return;
+#endif
             path = path.Replace('\\', '/').ToLower();
             if (!path.EndsWith(Util.customLoadExt))
                 return;
@@ -154,7 +217,6 @@ namespace Cirilla
 
             assetBundleInfo.assetBundle.Unload(true);
             bundles.Remove(bundleName);
-            Resources.UnloadUnusedAssets();
         }
 
         public void UnLoadAsset(Object obj)
@@ -176,8 +238,14 @@ namespace Cirilla
             string bundleName = assets[target].bundleName;
             assets.Remove(target);
             if(!(obj is GameObject))
-            Resources.UnloadAsset(obj);
-            
+                Resources.UnloadAsset(obj);
+            else Resources.UnloadUnusedAssets();
+
+#if UNITY_EDITOR
+            if (Util.lazyLoad)
+                return;
+#endif
+
             if (!bundles.TryGetValue(bundleName, out AssetBundleInfo assetBundleInfo))
                 return;
 
@@ -189,16 +257,23 @@ namespace Cirilla
 
             assetBundleInfo.assetBundle.Unload(true);
             bundles.Remove(bundleName);
-            Resources.UnloadUnusedAssets();
         }
 
         public void Clear()
         {
-            foreach(AssetInfo assetInfo in assets.Values)
+            foreach (AssetInfo assetInfo in assets.Values)
                 if(!(assetInfo.obj is GameObject))
                     Resources.UnloadAsset(assetInfo.obj);
 
             assets.Clear();
+
+#if UNITY_EDITOR
+            if (Util.lazyLoad)
+            {
+                Resources.UnloadUnusedAssets();
+                return;
+            }
+#endif
 
             Dictionary<string, AssetBundleInfo> buffer = new Dictionary<string, AssetBundleInfo>(bundles);
 
@@ -210,10 +285,29 @@ namespace Cirilla
                 kv.Value.assetBundle.Unload(true);
                 bundles.Remove(kv.Key);
             }
+        }
+#if UNITY_EDITOR
+        private T LazyLoadAsset<T>(string path) where T : Object
+        {
+            T obj = UnityEditor.AssetDatabase.LoadAssetAtPath<T>($"{Util.devPath}/{Util.rawResourceFolder}/{path}");
+            if (obj == null)
+                return null;
 
-            Resources.UnloadUnusedAssets();
+            assets.Add(path, new AssetInfo(obj, ""));
+
+            return obj;
         }
 
+        private void LazyLoadAssetAsync<T>(string path, Action<T> callBack) where T : Object
+        {
+            T obj = UnityEditor.AssetDatabase.LoadAssetAtPath<T>($"{Util.devPath}/{Util.rawResourceFolder}/{path}");
+            callBack(obj);
+            if (obj == null)
+                return;
+
+            assets.Add(path, new AssetInfo(obj, ""));
+        }
+#endif
         private IEnumerator LoadAssetBundleAsync(string path, Action<AssetBundle> callBack)
         {
             AssetBundleCreateRequest assetBundleCreateRequest = AssetBundle.LoadFromFileAsync(path);

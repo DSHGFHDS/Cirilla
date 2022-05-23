@@ -12,13 +12,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b9643947ae9027b4fb28fc685741f548, type: 3}
   m_Name: DevConfig
   m_EditorClassIdentifier: 
-  runtimePlatform: 0
   projectPath: Assets/GameLogic
   mVCFolder: MVC
   controllerFolder: Controller
   modelFolder: Model
   viewFolder: View
   assetBundleExtension: .pk
-  resourcesFolder: RawResources
+  rawResourcesFolder: RawResources
+  buildResourcesFolder: BuildResources
   preLoadExt: _public
   customLoadExt: _custom
+  lazyLoad: 0

@@ -6,17 +6,6 @@ namespace Cirilla
     {
         private const string DevConfigAssetPath = "DevConfig";
 
-        public static RuntimePlatform platform
-        {
-            get
-            {
-                DevConfig devConfig = Resources.Load<DevConfig>(DevConfigAssetPath);
-                RuntimePlatform runtimePlatform = devConfig.runtimePlatform;
-                Resources.UnloadAsset(devConfig);
-                return runtimePlatform;
-            }
-        }
-
         public static string devPath
         {
             get
@@ -49,16 +38,28 @@ namespace Cirilla
                 return ext.ToLower();
             }
         }
-        public static string resourceFolder
+
+        public static string rawResourceFolder
         {
             get
             {
                 DevConfig devConfig = Resources.Load<DevConfig>(DevConfigAssetPath);
-                string path = devConfig.resourcesFolder;
+                string folder = devConfig.rawResourcesFolder;
+                Resources.UnloadAsset(devConfig);
+                return folder;
+            }
+        }
+        public static string buildResourcesFolder
+        {
+            get
+            {
+                DevConfig devConfig = Resources.Load<DevConfig>(DevConfigAssetPath);
+                string path = devConfig.buildResourcesFolder;
                 Resources.UnloadAsset(devConfig);
                 return path;
             }
         }
+
         public static string preLoadExt
         {
             get
@@ -78,6 +79,17 @@ namespace Cirilla
                 string ext = devConfig.customLoadExt;
                 Resources.UnloadAsset(devConfig);
                 return ext.ToLower();
+            }
+        }
+
+        public static bool lazyLoad
+        {
+            get
+            {
+                DevConfig devConfig = Resources.Load<DevConfig>(DevConfigAssetPath);
+                bool value = devConfig.lazyLoad;
+                Resources.UnloadAsset(devConfig);
+                return value;
             }
         }
     }

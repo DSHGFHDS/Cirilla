@@ -29,6 +29,12 @@ namespace Cirilla.CEditor
                 return;
             }
 
+            if(!prefabPath.StartsWith($"{EditorUtil.devPath}/{EditorUtil.rawResourceFolder}/"))
+            {
+                EditorGUILayout.HelpBox($"预制体只有在资源文件夹:{EditorUtil.rawResourceFolder} 中才能被正确读取", MessageType.Warning);
+                return;
+            }
+
             GameObject resultObjct = null;
             EditorGUILayout.HelpBox("资源收集(拖取到以下框内进行添加)", MessageType.Info);
             EditorGUILayout.BeginVertical("FrameBox");
@@ -89,7 +95,7 @@ namespace Cirilla.CEditor
             bool codeExist = false;
             string resourceCodePath = path + $"/{EditorUtil.mVCFolder}/{EditorUtil.viewFolder}/{prefabObject.name}/{prefabObject.name}.resource.cs";
             string mainCodePath = path + $"/{EditorUtil.mVCFolder}/{EditorUtil.viewFolder}/{prefabObject.name}/{prefabObject.name}.cs";
-            string resPath = prefabPath.Split(new[] { EditorUtil.resourceFolder + "/" }, System.StringSplitOptions.None)[1];
+            string resPath = prefabPath.Split(new[] { EditorUtil.rawResourceFolder + "/" }, System.StringSplitOptions.None)[1];
 
             if (!File.Exists(resourceCodePath) || !File.Exists(mainCodePath))
                 goto NodeCode;
@@ -213,9 +219,8 @@ namespace Cirilla.CEditor
             $"                CiriDebugger.LogError(\"{className}加载失效\");" + "\n" +
             "                return;" + "\n" +
             "            }" + "\n" +
-            $"            {codeViewGameObjectName} = {gameObjectName}.Instantiate<{gameObjectName}>({codeViewPrefabName});" + "\n";
-
-            if(viewEntity.viewIndexInfos.Count > 0)
+            $"            {codeViewGameObjectName} = {typeof(Core).Name}.CirillaGiveBirth({codeViewPrefabName});" + "\n";
+            if (viewEntity.viewIndexInfos.Count > 0)
                 code += $"            {typeof(ViewEntity).Name} {viewEntityName} = {codeViewGameObjectName}.GetComponent<{typeof(ViewEntity).Name}>();" + "\n";
 
             foreach (ViewIndexInfo viewIndexInfo in viewEntity.viewIndexInfos)

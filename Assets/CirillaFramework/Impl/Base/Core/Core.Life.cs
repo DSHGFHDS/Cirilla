@@ -116,6 +116,9 @@ namespace Cirilla
 
         public static new void StopAllCoroutines() => ((MonoBehaviour)Runtime).StopAllCoroutines();
 
+        public static GameObject CirillaGiveBirth(GameObject prefabGo) => GameObject.Instantiate(prefabGo, rootGo.transform);
+        public static void AttachToCirilla(GameObject go) => go.transform.SetParent(rootGo.transform);
+
         private IEnumerator TaskOver(float time, Action<object[]> callBack, params object[] args)
         {
             yield return new WaitForSeconds(time);

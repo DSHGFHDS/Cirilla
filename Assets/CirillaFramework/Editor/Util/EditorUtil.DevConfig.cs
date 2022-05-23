@@ -5,25 +5,6 @@ namespace Cirilla.CEditor
     {
         private const string DevConfigAssetPath = "DevConfig";
 
-        public static RuntimePlatform platform
-        {
-            get
-            {
-                DevConfig devConfig = LoadAssetFromResources<DevConfig>(DevConfigAssetPath);
-                RuntimePlatform runtimePlatform = devConfig.runtimePlatform;
-                UnLoadAsset(devConfig);
-                return runtimePlatform;
-            }
-
-            set
-            {
-                DevConfig devConfig = LoadAssetFromResources<DevConfig>(DevConfigAssetPath);
-                devConfig.runtimePlatform = value;
-                SaveAsset(devConfig);
-                UnLoadAsset(devConfig);
-            }
-        }
-
         public static string devPath
         {
             get
@@ -147,20 +128,39 @@ namespace Cirilla.CEditor
             }
         }
 
-        public static string resourceFolder
+        public static string rawResourceFolder
         {
             get
             {
                 DevConfig devConfig = LoadAssetFromResources<DevConfig>(DevConfigAssetPath);
-                string folder = devConfig.resourcesFolder;
+                string folder = devConfig.rawResourcesFolder;
                 UnLoadAsset(devConfig);
-                return folder != string.Empty ? folder : (resourceFolder = "RawResources");
+                return folder != string.Empty ? folder : (rawResourceFolder = "RawResources");
             }
 
             set
             {
                 DevConfig devConfig = LoadAssetFromResources<DevConfig>(DevConfigAssetPath);
-                devConfig.resourcesFolder = value;
+                devConfig.rawResourcesFolder = value;
+                SaveAsset(devConfig);
+                UnLoadAsset(devConfig);
+            }
+        }
+
+        public static string buildResourcesFolder
+        {
+            get
+            {
+                DevConfig devConfig = LoadAssetFromResources<DevConfig>(DevConfigAssetPath);
+                string folder = devConfig.buildResourcesFolder;
+                UnLoadAsset(devConfig);
+                return folder != string.Empty ? folder : (buildResourcesFolder = "BuildResources");
+            }
+
+            set
+            {
+                DevConfig devConfig = LoadAssetFromResources<DevConfig>(DevConfigAssetPath);
+                devConfig.buildResourcesFolder = value;
                 SaveAsset(devConfig);
                 UnLoadAsset(devConfig);
             }
@@ -199,6 +199,25 @@ namespace Cirilla.CEditor
             {
                 DevConfig devConfig = LoadAssetFromResources<DevConfig>(DevConfigAssetPath);
                 devConfig.customLoadExt = value;
+                SaveAsset(devConfig);
+                UnLoadAsset(devConfig);
+            }
+        }
+
+        public static bool lazyLoad
+        {
+            get
+            {
+                DevConfig devConfig = LoadAssetFromResources<DevConfig>(DevConfigAssetPath);
+                bool value = devConfig.lazyLoad;
+                UnLoadAsset(devConfig);
+                return value;
+            }
+
+            set
+            {
+                DevConfig devConfig = LoadAssetFromResources<DevConfig>(DevConfigAssetPath);
+                devConfig.lazyLoad = value;
                 SaveAsset(devConfig);
                 UnLoadAsset(devConfig);
             }

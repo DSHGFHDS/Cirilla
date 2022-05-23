@@ -2,24 +2,21 @@ using Cirilla;
 
 namespace GameLogic
 {
-    public class TESTController : IController
+    public class TestController : IController
     {
+        #region Model和View只允许在Controller中注入
         [Model] TestModel testModel;
-        [View] TestView testView;
-        [View] UIView uIView;
-        public TESTController()
-        {
-             
-        }
+        [View] TestUIView testUIView;
+        #endregion
 
         public void Dispose()
         {
-            CiriDebugger.Log("TESTController Out");
+            CiriDebugger.Log("TestController Out");
         }
 
         public void Init()
         {
-            CiriDebugger.Log("TESTController");
+            CiriDebugger.Log("TestController In");
         }
     }
 }

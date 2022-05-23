@@ -4,5 +4,8 @@
 EditorBuildSettings:
   m_ObjectHideFlags: 0
   serializedVersion: 2
-  m_Scenes: []
+  m_Scenes:
+  - enabled: 1
+    path: Assets/GameLogic/RawResources/Scene/Test.unity
+    guid: f27f469ade4a45243bd1fbafd67e6e02
   m_configObjects: {}
