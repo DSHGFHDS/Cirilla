@@ -11,7 +11,7 @@ namespace Cirilla.CEditor
     public class ProcessPanelDraw : EditorWindow
     {
         private List<ProcessInfoAttribute> processBuffer;
-        [MenuItem("Cirilla/流程配置表")]
+        [MenuItem("Cirilla/流程配置表", false, 52)]
         private static void Open()
         { 
             GetWindow<ProcessPanelDraw>("流程配置表").Show();

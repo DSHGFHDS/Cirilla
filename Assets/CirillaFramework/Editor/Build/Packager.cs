@@ -12,7 +12,7 @@ namespace Cirilla.CEditor
     {
         private static BuildTarget selectedBuildTarget = BuildTarget.StandaloneWindows64;
 
-        [MenuItem("Cirilla/资源配置表")]
+        [MenuItem("Cirilla/工具/资源管理器", false, 61)]
         public static void Open() => GetWindow<Packager>("资源配置表").Show();
 
         public void OnGUI()

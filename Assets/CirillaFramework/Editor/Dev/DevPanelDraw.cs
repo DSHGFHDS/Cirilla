@@ -24,7 +24,7 @@ namespace Cirilla.CEditor
             "    \"noEngineReferences\": false" + "\n" +
             "}";
 
-        [MenuItem("Cirilla/开发配置表")]
+        [MenuItem("Cirilla/开发配置表", false, 51)]
         private static void Open()
         {
             GetWindow<DevPanelDraw>("开发配置表").Show();

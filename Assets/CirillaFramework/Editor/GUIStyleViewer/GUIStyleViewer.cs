@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿//搬运https://blog.csdn.net/u011428080/article/details/106676213/
+using UnityEngine;
 using UnityEditor;
 
 namespace Cirilla.CEditor
@@ -9,7 +10,7 @@ namespace Cirilla.CEditor
         private string search = "";
         private GUIStyle textStyle;
 
-        [MenuItem("Cirilla/工具/GUIStyle查看器", false, 1)]
+        [MenuItem("Cirilla/工具/GUIStyle查看器", false, 62)]
         private static void OpenStyleViewer() => GetWindow<GUIStyleViewer>(false, "GUIStyle查看器");
         private void OnGUI()
         {
