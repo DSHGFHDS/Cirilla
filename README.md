@@ -16,7 +16,7 @@ Ciriila提供了一套以文件夹分类、0依赖的资源管理机制，并提
 
 网络模块 ->INetModule
 
-订阅器模块 ->ObserverModule
+订阅器模块 ->IObserverModule
 
 MVC模块 ->IMVCModule
 
