@@ -20,7 +20,7 @@ Ciriila提供了一套以文件夹分类、0依赖的资源管理机制，并提
 
 MVC模块 ->IMVCModule
 
-CSV模块 ->CSVModule
+CSV模块 ->ICSVModule
 
 后续会根据业务情况总结迭代更多可复用的功能
 
