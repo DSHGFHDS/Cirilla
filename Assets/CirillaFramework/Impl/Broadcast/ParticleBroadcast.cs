@@ -17,8 +17,6 @@ namespace Cirilla
             observer = containerIns.Resolve<IObserverModule>();
         }
 
-        private void OnParticleSystemStopped(){
-            observer.Dispatch(ParticleEvent.Stop, gameObject);
-        }
+        private void OnParticleSystemStopped() => observer.Dispatch(ParticleEvent.Stop, gameObject);
     }
 }

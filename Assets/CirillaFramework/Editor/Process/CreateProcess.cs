@@ -75,7 +75,7 @@ namespace Cirilla.CEditor
             "    }" + "\n" +
             "}" + "\n";
 
-            Util.Write(resultPath, code);
+            EditorUtil.Write(resultPath, code);
             AssetDatabase.Refresh();
         }
     }

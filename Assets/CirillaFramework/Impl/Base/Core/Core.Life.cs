@@ -21,18 +21,25 @@ namespace Cirilla
             messageQueue = new ConcurrentQueue<MessageInfo>();
 #if UNITY_EDITOR
             string dllPath = Environment.CurrentDirectory.Replace("\\", "/") + $"/Library/ScriptAssemblies/{Util.devPath.Substring("Assets/".Length)}.dll";
-#elif UNITY_STANDALONE_WIN || UNITY_STANDALONE_WIN
-            string dllPath = Application.streamingAssetsPath + $"/{Util.devPath.Substring("Assets/".Length)}.dll";
-#elif UNITY_ANDROID
-#elif ENABLE_MICROPHONE
-#endif
             if (!File.Exists(dllPath))
             {
                 CiriDebugger.LogWarning(dllPath + "不存在");
                 return;
             }
-
             byte[] dllBytes = File.ReadAllBytes(dllPath);
+            
+#elif UNITY_STANDALONE_WIN || UNITY_STANDALONE_WIN
+            string assemblyName = Util.devPath.Substring("Assets/".Length);
+            byte[] dllBytes = containerIns.Resolve<IResModule>().LoadAsset<TextAsset>($"{assemblyName}{Util.preLoadExt}/{assemblyName}.bytes")?.bytes;
+#elif UNITY_ANDROID
+#elif ENABLE_MICROPHONE
+#endif
+            if (dllBytes == null)
+            {
+                CiriDebugger.Log("Fuck");
+                return;
+            }
+
             Assembly assembly = Assembly.Load(dllBytes);
 
             Type type = null;

@@ -28,25 +28,12 @@ namespace Cirilla
 			observer.Dispatch(MouseUIEvent.ClickRight, gameObject);
 		}
 
-		public void OnPointerEnter(PointerEventData eventData)
-		{
-			observer.Dispatch(MouseUIEvent.Enter, gameObject);
-		}
+		public void OnPointerEnter(PointerEventData eventData) => observer.Dispatch(MouseUIEvent.Enter, gameObject);
 
-		public void OnPointerExit(PointerEventData eventData)
-		{
-			observer.Dispatch(MouseUIEvent.Exit, gameObject);
-		}
+		public void OnPointerExit(PointerEventData eventData) => observer.Dispatch(MouseUIEvent.Exit, gameObject);
 
-		public void OnPointerDown(PointerEventData eventData)
-		{
-			observer.Dispatch(MouseUIEvent.Down, gameObject);
-		}
+		public void OnPointerDown(PointerEventData eventData) => observer.Dispatch(MouseUIEvent.Down, gameObject);
 
-		public void OnDrag(PointerEventData eventData)
-		{
-			observer.Dispatch(MouseUIEvent.Drag, gameObject);
-		}
-
+		public void OnDrag(PointerEventData eventData) => observer.Dispatch(MouseUIEvent.Drag, gameObject);
 	}
 }

@@ -162,7 +162,7 @@ namespace Cirilla.CEditor
             Message += 
                 "   }" + "\n" + 
                 "}" + "\n";
-            Util.Write(path, Message);
+            EditorUtil.Write(path, Message);
         }
 
         private List<ProcessInfoAttribute> LoadAttributes(Type type)

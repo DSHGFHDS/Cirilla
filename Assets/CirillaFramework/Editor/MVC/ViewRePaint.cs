@@ -186,7 +186,7 @@ namespace Cirilla.CEditor
             "    }" + "\n" +
             "}" + "\n";
 
-            Util.Write(path, code);
+            EditorUtil.Write(path, code);
             AssetDatabase.Refresh();
         }
 
@@ -240,7 +240,7 @@ namespace Cirilla.CEditor
             "    }" + "\n" +
             "}" + "\n";
 
-            Util.Write(path, code);
+            EditorUtil.Write(path, code);
             AssetDatabase.Refresh();
         }
     }

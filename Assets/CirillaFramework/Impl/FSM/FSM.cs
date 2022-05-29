@@ -8,9 +8,7 @@ namespace Cirilla
         private Dictionary<Type, AStateBase> stateStock;
         private AStateBase runningState { get;  set; }
 
-        public FSM(){
-            stateStock = new Dictionary<Type, AStateBase>();
-        }
+        public FSM() => stateStock = new Dictionary<Type, AStateBase>();
 
         private void Change(Type type, params object[] args)
         {
@@ -47,10 +45,7 @@ namespace Cirilla
             state.Init();
         }
 
-        public void Change<T>(params object[] args) where T : AStateBase
-        {
-            Change(typeof(T), args);
-        }
+        public void Change<T>(params object[] args) where T : AStateBase => Change(typeof(T), args);
 
         public void Remove<T>() where T : AStateBase
         {
@@ -74,8 +69,6 @@ namespace Cirilla
             stateStock.Clear();
         }
 
-        public void OnUpdate() {
-            runningState?.OnUpdate();
-        }
+        public void OnUpdate() => runningState?.OnUpdate();
     }
 }

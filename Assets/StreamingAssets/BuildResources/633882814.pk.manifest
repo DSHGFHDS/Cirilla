@@ -1,0 +1,33 @@
+ManifestFileVersion: 0
+CRC: 1479309854
+Hashes:
+  AssetFileHash:
+    serializedVersion: 2
+    Hash: 5eebf0639226778b196c510958664c60
+  TypeTreeHash:
+    serializedVersion: 2
+    Hash: 79e98064320844b9cdfdc0cb4de47c51
+HashAppended: 0
+ClassTypes:
+- Class: 1
+  Script: {instanceID: 0}
+- Class: 4
+  Script: {instanceID: 0}
+- Class: 21
+  Script: {instanceID: 0}
+- Class: 28
+  Script: {instanceID: 0}
+- Class: 48
+  Script: {instanceID: 0}
+- Class: 89
+  Script: {instanceID: 0}
+- Class: 104
+  Script: {instanceID: 0}
+- Class: 157
+  Script: {instanceID: 0}
+- Class: 196
+  Script: {instanceID: 0}
+SerializeReferenceClassIdentifiers: []
+Assets:
+- Assets/GameLogic/RawResources/Scene/Test.unity
+Dependencies: []

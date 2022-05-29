@@ -15,8 +15,9 @@ namespace Cirilla.CEditor
         {
             Packager.Packgae(options.target);
             BuildPipeline.BuildPlayer(options);
-            Directory.Delete(Application.streamingAssetsPath, true);
             File.Delete(Application.streamingAssetsPath + ".meta");
+            Directory.Delete(Application.streamingAssetsPath, true);
+            AssetDatabase.Refresh();
         }
     }
 }

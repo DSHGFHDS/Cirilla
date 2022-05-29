@@ -29,6 +29,9 @@ namespace Cirilla
 
         public static bool IsMatchStatementRule(string str)
         {
+            if (string.IsNullOrEmpty(str))
+                return false;
+
             if (str[0] >= 0 && str[0] <= 57)
                 return false;
 

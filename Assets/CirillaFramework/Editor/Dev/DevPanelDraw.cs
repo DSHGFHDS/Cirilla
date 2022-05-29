@@ -102,7 +102,7 @@ namespace Cirilla.CEditor
 
             string writePath = path + "/" + assemblyName + ".asmdef";
             string text = assemblyDef.Replace(replaceCode[0], assemblyName).Replace(replaceCode[1], AssetDatabase.GUIDFromAssetPath("Assets/CirillaFramework/CirilaFramework.asmdef").ToString());
-            Util.Write(writePath, text);
+            EditorUtil.Write(writePath, text);
             AssetDatabase.Refresh();
         }
     }

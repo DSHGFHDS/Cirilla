@@ -19,12 +19,15 @@ namespace Cirilla
             rootGo.AddComponent<StandaloneInputModule>();
             Runtime = rootGo.AddComponent<Core>();
             containerIns = IocContainer.instance;
-            Runtime.RegisterModule();
         }
 
         private void Awake() => DontDestroyOnLoad(rootGo);
 
-        private void Start() => ProcessesInit();
+        private void Start()
+        {
+            RegisterModule();
+            ProcessesInit();
+        }
 
         private void RegisterModule()
         {

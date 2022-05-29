@@ -6,9 +6,7 @@ namespace Cirilla
     public class ObserverModule : IObserverModule
     {
         private Dictionary<ValueType, Action<object[]>> stock;
-        public ObserverModule(){
-            stock = new Dictionary<ValueType, Action<object[]>>();
-        }
+        public ObserverModule() => stock = new Dictionary<ValueType, Action<object[]>>();
 
         public void Add<T>(T type, Action<object[]> callBack) where T : struct
         {

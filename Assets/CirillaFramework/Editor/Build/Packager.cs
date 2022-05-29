@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using UnityEditor;
+using UnityEditor.Build.Player;
 using UnityEngine;
 
 namespace Cirilla.CEditor
@@ -10,6 +11,7 @@ namespace Cirilla.CEditor
     public class Packager : EditorWindow
     {
         private static BuildTarget selectedBuildTarget = BuildTarget.StandaloneWindows64;
+
         [MenuItem("Cirilla/资源配置表")]
         public static void Open() => GetWindow<Packager>("资源配置表").Show();
 
@@ -40,8 +42,9 @@ namespace Cirilla.CEditor
 
             if (GUILayout.Button("清理"))
             {
+                File.Delete(Application.streamingAssetsPath + ".meta");
                 Directory.Delete(Application.streamingAssetsPath, true);
-                File.Delete(Application.streamingAssetsPath+".meta");
+                AssetDatabase.Refresh();
             }
         }
 
@@ -49,34 +52,39 @@ namespace Cirilla.CEditor
         {
             List<AssetBundleBuild> resBuffer = new List<AssetBundleBuild>();
 
+            string assemblyName = EditorUtil.devPath.Substring("Assets/".Length);
             string path;
-            if (EditorUtil.devPath == string.Empty || !Directory.Exists(path = Application.dataPath + "/" + EditorUtil.devPath.Substring("Assets/".Length) + "/" + EditorUtil.rawResourceFolder))
+            if (EditorUtil.devPath == string.Empty || !Directory.Exists(path = Application.dataPath + "/" + assemblyName + "/" + EditorUtil.rawResourceFolder))
             {
                 CiriDebugger.LogError("打包失败，开发目录缺失！");
                 return;
             }
 
-            path = path.Replace('/', '\\');
+            string compilationTemp = Environment.CurrentDirectory.Replace("\\", "/") + "/Temp/Cirilla";
+            ScriptCompilationSettings scriptCompilationSettings = new ScriptCompilationSettings();
+            scriptCompilationSettings.group = BuildPipeline.GetBuildTargetGroup(buildTarget);
+            scriptCompilationSettings.target = buildTarget;
+            scriptCompilationSettings.options = ScriptCompilationOptions.DevelopmentBuild;
+            PlayerBuildInterface.CompilePlayerScripts(scriptCompilationSettings, compilationTemp);
+
+            string assemblyPath = $"{path}/{assemblyName}{EditorUtil.preLoadExt}";
+            if (!Directory.Exists(assemblyPath))
+                Directory.CreateDirectory(assemblyPath);
+
+            File.WriteAllBytes($"{assemblyPath}/{assemblyName}.bytes", File.ReadAllBytes(compilationTemp + $"/{assemblyName}.dll"));
+            Directory.Delete(compilationTemp, true);
+            AssetDatabase.Refresh();
             Collect(path, resBuffer);
 
-            string buildPath = Application.streamingAssetsPath + $"\\{EditorUtil.buildResourcesFolder}\\";
+            string buildPath = Application.streamingAssetsPath + $"/{EditorUtil.buildResourcesFolder}";
             if (Directory.Exists(buildPath))
                 Directory.Delete(buildPath, true);
 
             Directory.CreateDirectory(buildPath);
             BuildPipeline.BuildAssetBundles(buildPath, resBuffer.ToArray(), BuildAssetBundleOptions.ChunkBasedCompression, buildTarget);
-
-            string dllName = $"{ EditorUtil.devPath.Substring("Assets/".Length) }.dll";
-            string dllPath = Environment.CurrentDirectory.Replace("\\", "/") + $"/Library/ScriptAssemblies/{dllName}";
-
-            if (!File.Exists(dllPath))
-            {
-                CiriDebugger.LogError(dllPath + "打包缺失：" + dllPath);
-                return;
-            }
-
-            byte[] dllBytes = File.ReadAllBytes(dllPath);
-            File.WriteAllBytes(Application.streamingAssetsPath + $"/{dllName}", dllBytes);
+            File.Delete(assemblyPath + ".meta");
+            Directory.Delete(assemblyPath, true);
+            AssetDatabase.Refresh();
         }
 
         private static void Collect(string path, List<AssetBundleBuild> resBuffer)
@@ -112,8 +120,10 @@ namespace Cirilla.CEditor
                     if (IgnoreFile(dependence) || asset == dependence)
                         continue;
 
-                    if (!items.Contains(dependence))
-                        items.Add(dependence);
+                    if (items.Contains(dependence))
+                        continue;
+
+                    items.Add(dependence);
                 }
             }
 
