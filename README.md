@@ -1,6 +1,6 @@
 # Cirilla
 
-与huatuo热更进行适配的unity3d开发框架。
+与huatuo热更进行适配的unity3d开发框架（未集成huatuo热更框架，需要的可自行部署:https://github.com/focus-creative-games/huatuo）。
 
 基础模块以依赖注入与控制反转的方式进行加载和使用(IocContainer)。
 
