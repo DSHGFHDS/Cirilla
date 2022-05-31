@@ -1,0 +1,21 @@
+ManifestFileVersion: 0
+CRC: 1810158285
+Hashes:
+  AssetFileHash:
+    serializedVersion: 2
+    Hash: 717853deaae024597182a204d1aaf06e
+  TypeTreeHash:
+    serializedVersion: 2
+    Hash: 04fe97b7fc2f56a12f72365bd4c81609
+HashAppended: 0
+ClassTypes:
+- Class: 49
+  Script: {instanceID: 0}
+- Class: 83
+  Script: {instanceID: 0}
+SerializeReferenceClassIdentifiers: []
+Assets:
+- Assets/GameLogic/RawResources/AssassinKill.mp3
+- Assets/GameLogic/RawResources/NewB.txt
+- Assets/GameLogic/RawResources/Excecution.mp3
+Dependencies: []

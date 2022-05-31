@@ -208,7 +208,7 @@ namespace Cirilla.CEditor
             $"        private {gameObjectName} {codeViewPrefabName};" + "\n" +
             $"        private {gameObjectName} {codeViewGameObjectName};" + "\n" + "\n";
             foreach (ViewIndexInfo viewIndexInfo in viewEntity.viewIndexInfos) 
-                code += $"        private {gameObjectName} {viewIndexInfo.key};" + "\n";
+                code += $"        public {gameObjectName} {viewIndexInfo.key};" + "\n";
 
             code +=
             "        public void Init()" + "\n" +

@@ -28,24 +28,24 @@ namespace Cirilla
                 return null;
             }
 
-            foreach (KeyValuePair<GameObject, bool> kv in new Dictionary<GameObject, bool>(poolData.pool))
-            {
-                if (kv.Value)
-                    continue;
+            GameObject go = null;
+            while (poolData.validPool.Count > 0 && go == null)
+                go = poolData.validPool.Dequeue();
 
-                poolData.pool[kv.Key] = true;
-                kv.Key.SetActive(true);
-                return kv.Key;
+            if (go != null)
+            {
+                go.SetActive(true);
+                return go;
             }
 
-            if (poolData.pool.Count >= poolData.capacity)
+            if (poolData.pool.Count >= poolData.pool.Capacity)
                 return null;
 
-            GameObject go = GameObject.Instantiate(prefab);
+            go = GameObject.Instantiate(prefab);
             go.AddComponent<GoPoolEntity>().Init(OnGoDestroy);
             go.name = poolName;
+            poolData.pool.Add(go);
             go.SetActive(true);
-            poolData.pool.Add(go, true);
 
             return go;
         }
@@ -54,24 +54,24 @@ namespace Cirilla
         {
             if (go == null)
             {
-                CiriDebugger.LogWarning("回收了个空实体");
+                CiriDebugger.LogWarning("回收实体为空");
                 return;
             }
 
             if (!pools.TryGetValue(go.name, out GoPoolData poolData))
             {
-                CiriDebugger.LogWarning("没有适合该实体的容器:" + go.name);
+                CiriDebugger.LogWarning("没有适合该实体的对象池:" + go.name);
                 return;
             }
 
-            if (!poolData.pool.ContainsKey(go))
+            if (!poolData.pool.Contains(go))
             {
-                CiriDebugger.LogWarning("该实体并非容器创建:" + go.name);
+                CiriDebugger.LogWarning("该实体并非对象池创建:" + go.name);
                 return;
             }
 
-            poolData.pool[go] = false;
             go.SetActive(false);
+            poolData.validPool.Enqueue(go);
         }
 
         public void Load(GameObject prefab, int capacity)
@@ -96,7 +96,7 @@ namespace Cirilla
                 return;
             }
 
-            pools.Add(poolName, new GoPoolData(new Dictionary<GameObject, bool>(capacity), capacity));
+            pools.Add(poolName, new GoPoolData(capacity));
         }
 
         public void Unload(GameObject prefab)
@@ -115,33 +115,18 @@ namespace Cirilla
                 return;
             }
 
-            List<GameObject> goBuffer = new List<GameObject>(poolData.pool.Keys);
-            for (int i = goBuffer.Count-1; i >= 0; i --)
-            {
-                if (goBuffer[i] == null)
-                    continue;
+            for (int i = poolData.pool.Count - 1; i >= 0; i--)
+                GameObject.Destroy(poolData.pool[i]);
 
-                GameObject.Destroy(goBuffer[i]);
-            }
-
-            poolData.pool.Clear();
             pools.Remove(poolname);
         }
 
         public void Clear()
         {
-            List<string> poolBuffer = new List<string>(pools.Keys);
-            for(int i = poolBuffer.Count - 1; i >= 0; i --)
+            foreach(GoPoolData poolData in pools.Values)
             {
-                List<GameObject> goBuffer = new List<GameObject>(pools[poolBuffer[i]].pool.Keys);
-                for(int j = goBuffer.Count-1; j >=0; j --)
-                {
-                    if (goBuffer[i] == null)
-                        continue;
-
-                    GameObject.Destroy(goBuffer[i]);
-                }
-                pools[poolBuffer[i]].pool.Clear();
+                for (int i = poolData.pool.Count - 1; i >= 0; i--)
+                    GameObject.Destroy(poolData.pool[i]);
             }
             pools.Clear();
         }
@@ -151,7 +136,7 @@ namespace Cirilla
             if (!pools.TryGetValue(go.name, out GoPoolData poolData))
                 return;
 
-            if (!poolData.pool.ContainsKey(go))
+            if (!poolData.pool.Contains(go))
                 return;
             
             poolData.pool.Remove(go);

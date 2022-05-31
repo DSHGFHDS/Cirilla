@@ -12,7 +12,7 @@ namespace GameLogic
         private GameObject viewPrefab;
         private GameObject viewGameObjcet;
 
-        private GameObject newB;
+        public GameObject newB;
         public void Init()
         {
             viewPrefab = resModule.LoadAsset<GameObject>(bindedPath);

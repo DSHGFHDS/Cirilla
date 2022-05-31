@@ -5,6 +5,7 @@ using System.IO;
 using UnityEditor;
 using UnityEditor.Build.Player;
 using UnityEngine;
+using Object = UnityEngine.Object;
 
 namespace Cirilla.CEditor
 {
@@ -50,7 +51,8 @@ namespace Cirilla.CEditor
 
         public static void Packgae(BuildTarget buildTarget)
         {
-            List<AssetBundleBuild> resBuffer = new List<AssetBundleBuild>();
+            List<List<AssetBundleBuild>> resBuffer = new List<List<AssetBundleBuild>>();
+            resBuffer.Add(new List<AssetBundleBuild>());
 
             string assemblyName = EditorUtil.devPath.Substring("Assets/".Length);
             string path;
@@ -81,13 +83,19 @@ namespace Cirilla.CEditor
                 Directory.Delete(buildPath, true);
 
             Directory.CreateDirectory(buildPath);
-            BuildPipeline.BuildAssetBundles(buildPath, resBuffer.ToArray(), BuildAssetBundleOptions.ChunkBasedCompression, buildTarget);
+            foreach (List<AssetBundleBuild> assetBundleBuilds in resBuffer)
+                BuildPipeline.BuildAssetBundles(buildPath, assetBundleBuilds.ToArray(), BuildAssetBundleOptions.ChunkBasedCompression, buildTarget);
+
+            File.Delete(buildPath + "/BuildResources");
+            File.Delete(buildPath + "/BuildResources.manifest");
+            File.Delete(buildPath + "/BuildResources.manifest.meta");
+            File.Delete(buildPath + "/BuildResources.meta");
             File.Delete(assemblyPath + ".meta");
             Directory.Delete(assemblyPath, true);
             AssetDatabase.Refresh();
         }
 
-        private static void Collect(string path, List<AssetBundleBuild> resBuffer)
+        private static void Collect(string path, List<List<AssetBundleBuild>> resBuffer)
         {
             PickResources(path, resBuffer);
             string[] directories = Directory.GetDirectories(path);
@@ -95,13 +103,14 @@ namespace Cirilla.CEditor
                 Collect(directory, resBuffer);
         }
 
-        private static void PickResources(string path, List<AssetBundleBuild> resBuffer)
+        private static void PickResources(string path, List<List<AssetBundleBuild>> resBuffer)
         {
             DirectoryInfo directoryInfo = new DirectoryInfo(path);
             FileInfo[] fileInfos = directoryInfo.GetFiles();
             if (fileInfos.Length <= 0)
                 return;
 
+            int index = 0;
             List<string> items = new List<string>();
             foreach (FileInfo fileInfo in fileInfos)
             {
@@ -112,7 +121,10 @@ namespace Cirilla.CEditor
                 string asset = "Assets" + file.Substring(Application.dataPath.Length).Replace('\\', '/');
 
                 if (!items.Contains(asset))
+                {
+                    index = CheckSigned(asset, resBuffer);
                     items.Add(asset);
+                }
 
                 string[] dependences = AssetDatabase.GetDependencies(asset, true);
                 foreach (string dependence in dependences)
@@ -123,6 +135,7 @@ namespace Cirilla.CEditor
                     if (items.Contains(dependence))
                         continue;
 
+                    index = CheckSigned(dependence, resBuffer);
                     items.Add(dependence);
                 }
             }
@@ -133,7 +146,36 @@ namespace Cirilla.CEditor
             AssetBundleBuild assetBundleBuild = new AssetBundleBuild();
             assetBundleBuild.assetBundleName = path.EndsWith(EditorUtil.rawResourceFolder) ? EditorUtil.abRoot + EditorUtil.preLoadExt + EditorUtil.abExtension : GetBundleName(path);
             assetBundleBuild.assetNames = items.ToArray();
-            resBuffer.Add(assetBundleBuild);
+
+            if (index == -1)
+            {
+                resBuffer.Add(new List<AssetBundleBuild>() { assetBundleBuild });
+                return;
+            }
+
+            resBuffer[index].Add(assetBundleBuild);
+        }
+
+        private static int CheckSigned(string checkName, List<List<AssetBundleBuild>> resBuffer)
+        {
+            int index = 0;
+        ReCheck:
+            if (index >= resBuffer.Count)
+                return -1;
+
+            foreach (AssetBundleBuild assetBundleBuild in resBuffer[index])
+            {
+                foreach (string assetName in assetBundleBuild.assetNames)
+                {
+                    if (checkName != assetName)
+                        continue;
+
+                    index ++;
+                    goto ReCheck;
+                }
+            }
+
+            return index;
         }
 
         public static string GetBundleName(string path)
