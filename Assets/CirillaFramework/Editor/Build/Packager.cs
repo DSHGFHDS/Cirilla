@@ -5,7 +5,6 @@ using System.IO;
 using UnityEditor;
 using UnityEditor.Build.Player;
 using UnityEngine;
-using Object = UnityEngine.Object;
 
 namespace Cirilla.CEditor
 {
@@ -84,8 +83,15 @@ namespace Cirilla.CEditor
 
             Directory.CreateDirectory(buildPath);
             foreach (List<AssetBundleBuild> assetBundleBuilds in resBuffer)
+            {
                 BuildPipeline.BuildAssetBundles(buildPath, assetBundleBuilds.ToArray(), BuildAssetBundleOptions.ChunkBasedCompression, buildTarget);
-
+                foreach (AssetBundleBuild assetBundleBuild in assetBundleBuilds)
+                {
+                    File.Delete(buildPath + $"/{assetBundleBuild.assetBundleName}.manifest");
+                    File.Delete(buildPath + $"/{assetBundleBuild.assetBundleName}.manifest.meta");
+                }
+            }
+            
             File.Delete(buildPath + "/BuildResources");
             File.Delete(buildPath + "/BuildResources.manifest");
             File.Delete(buildPath + "/BuildResources.manifest.meta");
@@ -181,7 +187,7 @@ namespace Cirilla.CEditor
         public static string GetBundleName(string path)
         {
             path = path.ToLower().Replace("\\", "/");
-            string bundleName = path.Split(new[] { EditorUtil.rawResourceFolder.ToLower() + "/" }, System.StringSplitOptions.None)[1].GetHashCode().ToString();
+            string bundleName = path.Split(new[] { EditorUtil.rawResourceFolder.ToLower() + "/" }, StringSplitOptions.None)[1].GetHashCode().ToString();
 
             if (path.EndsWith(EditorUtil.preLoadExt))
                 return bundleName + EditorUtil.preLoadExt + EditorUtil.abExtension;

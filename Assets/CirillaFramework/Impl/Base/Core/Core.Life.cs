@@ -35,10 +35,7 @@ namespace Cirilla
 #elif ENABLE_MICROPHONE
 #endif
             if (dllBytes == null)
-            {
-                CiriDebugger.Log("Fuck");
                 return;
-            }
 
             Assembly assembly = Assembly.Load(dllBytes);
 
@@ -99,15 +96,12 @@ namespace Cirilla
             runningProcess?.OnInputUpdate();
             runningProcess?.OnLogicUpdatePre();
 
-            while (messageQueue.Count > 0)
-            {
-                MessageInfo message;
-                messageQueue.TryDequeue(out message);
-                if (message == null)
-                    continue;
+            MessageInfo message;
+            messageQueue.TryDequeue(out message);
+            if (message == null)
+                return;
 
-                message.callBack(message.args);
-            }
+            message.callBack(message.args);
         }
 
         private void LateUpdate() => runningProcess?.OnLogicUpdatePost();
