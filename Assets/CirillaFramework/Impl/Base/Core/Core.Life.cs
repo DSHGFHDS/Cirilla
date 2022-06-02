@@ -11,6 +11,11 @@ namespace Cirilla
 {
     public sealed partial class Core
     {
+        public static Action onInputUpdate;
+        public static Action onPhysicUpdate;
+        public static Action onLogicUpdatePre;
+        public static Action onLogicUpdatePost;
+
         private ConcurrentQueue<MessageInfo> messageQueue;
         private IProcess runningProcess { get; set; }
         private List<IProcess> InitedProcesses;
@@ -93,7 +98,9 @@ namespace Cirilla
 
         private void Update()
         {
+            onInputUpdate?.Invoke();
             runningProcess?.OnInputUpdate();
+            onLogicUpdatePre?.Invoke();
             runningProcess?.OnLogicUpdatePre();
 
             MessageInfo message;
@@ -104,8 +111,17 @@ namespace Cirilla
             message.callBack(message.args);
         }
 
-        private void LateUpdate() => runningProcess?.OnLogicUpdatePost();
-        private void FixedUpdate() => runningProcess?.OnPhysicUpdate();
+        private void LateUpdate()
+        {
+            onLogicUpdatePost?.Invoke();
+            runningProcess?.OnLogicUpdatePost();
+        }
+
+        private void FixedUpdate()
+        {
+            onPhysicUpdate?.Invoke();
+            runningProcess?.OnPhysicUpdate();
+        }
 
         public static void Push(Action<object[]> callback, params object[] args) => Runtime.messageQueue.Enqueue(new MessageInfo(callback, args));
 

@@ -14,9 +14,28 @@ namespace Cirilla
         {
             audioPool = new List<GameObject>();
             validPool = new Queue<GameObject>();
+            Core.onPhysicUpdate += OnPhysicUpdate;
         }
 
-        public void Play(GameObject owner, AudioClip audioClip, Action callback = null)
+        ~AudioModule()
+        {
+            Core.onPhysicUpdate -= OnPhysicUpdate;
+        }
+
+        public void OnPhysicUpdate()
+        {
+
+        }
+
+        public void PlayInChannel(GameObject owner, AudioClip audioClip, int channel, Action callback = null)
+        {
+            if (owner == null)
+                return;
+
+
+        }
+
+        public void PlayOneShot(GameObject owner, AudioClip audioClip, Action callback = null)
         {
             if (owner == null)
                 return;
@@ -33,7 +52,7 @@ namespace Cirilla
         }
 
 
-        public void Play(Vector3 pos, AudioClip audioClip, Action callback = null)
+        public void PlayOneShot(Vector3 pos, AudioClip audioClip, Action callback = null)
         {
             GameObject go = Acquire();
             AudioSource audioSource = go.GetComponent<AudioSource>();
