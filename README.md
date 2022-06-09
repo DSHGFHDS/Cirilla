@@ -22,5 +22,7 @@ MVC模块 ->IMVCModule
 
 CSV模块 ->ICSVModule
 
+声音模块 ->IAudioModule
+
 后续会根据业务情况总结迭代更多可复用的功能
 
