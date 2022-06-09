@@ -5,7 +5,7 @@ namespace Cirilla
 {
     public class MVCModule : IMVCModule
     {
-        private static IContainer containerIns;
+        private static IIocContianer containerIns;
 
         public MVCModule() => containerIns = IocContainer.instance;
 

@@ -8,6 +8,8 @@ namespace GameLogic
         #region Model和View只允许在Controller中注入
         [Model] TestModel testModel;
         [View] TestUIView testUIView;
+        [Dependency] IAudioModule audioModule;
+        [Dependency] IResModule resModule;
         #endregion
 
         public void Dispose()
@@ -18,6 +20,10 @@ namespace GameLogic
         public void Init()
         {
             CiriDebugger.Log("TestController In");
+
+            AudioClip audioClip = resModule.LoadAsset<AudioClip>("AssassinKill.mp3");
+
+            audioModule.Play(audioClip, false, 100);
         }
     }
 }

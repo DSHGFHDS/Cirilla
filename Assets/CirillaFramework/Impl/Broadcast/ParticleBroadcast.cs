@@ -6,7 +6,7 @@ namespace Cirilla
     public class ParticleBroadcast : MonoBehaviour
     {
         private IObserverModule observer;
-        private IContainer containerIns;
+        private IIocContianer containerIns;
         private void Start()
         {
             containerIns = IocContainer.instance;

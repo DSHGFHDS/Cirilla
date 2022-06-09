@@ -5,7 +5,7 @@ using System.Reflection;
 
 namespace Cirilla
 {
-    public class IocContainer : ASingletonBase<IocContainer>, IContainer
+    public class IocContainer : ASingletonBase<IocContainer>, IIocContianer
     {
         private const BindingFlags Flag = BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.DeclaredOnly;
         private Dictionary<Type, Dictionary<string, ContentInfo>> stock;

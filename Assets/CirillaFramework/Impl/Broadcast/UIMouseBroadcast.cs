@@ -7,7 +7,7 @@ namespace Cirilla
 	[AddComponentMenu("Cirilla/Broadcast/UIMouseBroadcast")]
 	public class UIMouseBroadcast : MonoBehaviour, IPointerClickHandler, IPointerEnterHandler, IPointerExitHandler, IPointerDownHandler, IDragHandler
 	{
-		private IContainer containerIns;
+		private IIocContianer containerIns;
 		private IObserverModule observer;
 		private void Start(){
 			containerIns = IocContainer.instance;

@@ -3,7 +3,7 @@ using System;
 
 namespace Cirilla
 {
-    public interface IContainer
+    public interface IIocContianer
     {
         void Register<T1, T2>(string key = "") where T1 : class where T2 : T1;
         void Register<T>(Type type, string key = "");

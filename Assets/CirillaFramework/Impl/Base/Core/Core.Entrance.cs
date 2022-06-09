@@ -9,7 +9,7 @@ namespace Cirilla
     {
         private const string rootName = "CirillaRoot";
         private static GameObject rootGo;
-        private static IContainer containerIns;
+        private static IIocContianer containerIns;
         private static Core Runtime;
 
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
@@ -38,6 +38,7 @@ namespace Cirilla
             containerIns.Register<INetModule, NetModule>();
             containerIns.Register<ICSVModule, CSVModule>();
             containerIns.Register<IGoPoolModule, GoPoolModule>();
+            containerIns.Register<IAudioModule, AudioModule>();
         }
     }
 }
