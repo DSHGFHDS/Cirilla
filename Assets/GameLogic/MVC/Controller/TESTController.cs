@@ -19,11 +19,8 @@ namespace GameLogic
 
         public void Init()
         {
-            CiriDebugger.Log("TestController In");
-
             AudioClip audioClip = resModule.LoadAsset<AudioClip>("AssassinKill.mp3");
-
-            audioModule.Play(audioClip, false, 100);
+            audioModule.Play(audioClip);
         }
     }
 }

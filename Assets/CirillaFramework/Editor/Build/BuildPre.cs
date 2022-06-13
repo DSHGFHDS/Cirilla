@@ -13,6 +13,14 @@ namespace Cirilla.CEditor
 
         public static void OnBuild(BuildPlayerOptions options)
         {
+            if (EditorUtil.devPath == string.Empty || !Directory.Exists(Application.dataPath + "/" + EditorUtil.devPath.Substring("Assets/".Length))
+                || !File.Exists(Application.dataPath + "/" + EditorUtil.devPath.Substring("Assets/".Length) + "/" + EditorUtil.devPath.Substring("Assets/".Length) + ".asmdef")
+                || !Directory.Exists(Application.dataPath + "/" + EditorUtil.devPath.Substring("Assets/".Length) + "/" + EditorUtil.rawResourceFolder))
+            {
+                CiriDebugger.LogError("Build失败，开发目录缺失或不完整！");
+                return;
+            }
+
             Packager.Packgae(options.target);
             BuildPipeline.BuildPlayer(options);
             File.Delete(Application.streamingAssetsPath + ".meta");
