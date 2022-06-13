@@ -11,7 +11,7 @@ namespace Cirilla.CEditor
     public class Packager : EditorWindow
     {
         private static BuildTarget selectedBuildTarget = BuildTarget.StandaloneWindows64;
-
+        private static string pkLog;
         [MenuItem("Cirilla/工具/资源管理器", false, 61)]
         public static void Open() => GetWindow<Packager>("资源配置表").Show();
 
@@ -50,6 +50,7 @@ namespace Cirilla.CEditor
 
         public static void Packgae(BuildTarget buildTarget)
         {
+            pkLog = string.Empty;
             List<List<AssetBundleBuild>> resBuffer = new List<List<AssetBundleBuild>>();
             resBuffer.Add(new List<AssetBundleBuild>());
 
@@ -99,6 +100,8 @@ namespace Cirilla.CEditor
             File.Delete(assemblyPath + ".meta");
             Directory.Delete(assemblyPath, true);
             AssetDatabase.Refresh();
+            if (pkLog != string.Empty)
+                Debug.Log(pkLog);
         }
 
         private static void Collect(string path, List<List<AssetBundleBuild>> resBuffer)
@@ -152,6 +155,9 @@ namespace Cirilla.CEditor
             AssetBundleBuild assetBundleBuild = new AssetBundleBuild();
             assetBundleBuild.assetBundleName = path.EndsWith(EditorUtil.rawResourceFolder) ? EditorUtil.abRoot + EditorUtil.preLoadExt + EditorUtil.abExtension : GetBundleName(path);
             assetBundleBuild.assetNames = items.ToArray();
+
+            if (!path.EndsWith(EditorUtil.rawResourceFolder))
+                pkLog += assetBundleBuild.assetBundleName + "(<color=#FF6EC7>" + path.Split(new[] { EditorUtil.rawResourceFolder + "\\" }, StringSplitOptions.None)[1] + "</color>)\n";
 
             if (index == -1)
             {
