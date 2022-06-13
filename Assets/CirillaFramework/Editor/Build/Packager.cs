@@ -187,6 +187,7 @@ namespace Cirilla.CEditor
         public static string GetBundleName(string path)
         {
             path = path.ToLower().Replace("\\", "/");
+
             string bundleName = path.Split(new[] { EditorUtil.rawResourceFolder.ToLower() + "/" }, StringSplitOptions.None)[1].GetHashCode().ToString();
 
             if (path.EndsWith(EditorUtil.preLoadExt))

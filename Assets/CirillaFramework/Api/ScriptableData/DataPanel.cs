@@ -8,7 +8,7 @@ namespace Cirilla
     {
         public List<DataPanelKV> dataList = new List<DataPanelKV>();
 
-        public bool TryGetValue<T>(string key, int index, out T value)
+        public bool TryGetValue<T>(string key, out T value, int index = 0)
         {
             foreach (DataPanelKV kv in dataList)
             {
