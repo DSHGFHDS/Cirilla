@@ -106,6 +106,9 @@ namespace Cirilla.CEditor
 
         private static void Collect(string path, List<List<AssetBundleBuild>> resBuffer)
         {
+            if (path.ToLower().EndsWith(EditorUtil.baseSourceExt))
+                return;
+
             PickResources(path, resBuffer);
             string[] directories = Directory.GetDirectories(path);
             foreach (string directory in directories)

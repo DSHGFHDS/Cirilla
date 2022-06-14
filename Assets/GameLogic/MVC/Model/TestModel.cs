@@ -1,17 +1,23 @@
 using Cirilla;
+using System.Collections.Generic;
+using UnityEngine;
 
 namespace GameLogic
 {
-    public class TestModel : IModel
+    /*
+    (TestModel)partial 这一边提供数据的获取和处理方法
+    (TestService)partial 则为TestModel提供数据的来源
+    */
+    public partial class TestModel : IModel
     {
-        public void Dispose()
-        {
-            CiriDebugger.Log("TestModel Out");
-        }
+        private List<Color> colors;
 
-        public void Init()
+        public Color GetRandomClore()
         {
-            CiriDebugger.Log("TestModel In");
+            if (colors == null || colors.Count <= 0)
+                return Color.clear;
+
+            return colors[Random.Range(0, colors.Count)];
         }
     }
 }

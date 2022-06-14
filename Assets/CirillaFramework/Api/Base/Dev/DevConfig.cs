@@ -14,6 +14,7 @@ namespace Cirilla
         public string buildResourcesFolder = "BuildResources";
         public string preLoadExt = "_public";
         public string customLoadExt = "_custom";
+        public string baseSourceExt = "_base";
         public bool lazyLoad = false;
         public string rootName { get { return "root"; } }
     }

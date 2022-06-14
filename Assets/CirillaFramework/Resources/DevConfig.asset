@@ -22,4 +22,5 @@ MonoBehaviour:
   buildResourcesFolder: BuildResources
   preLoadExt: _public
   customLoadExt: _custom
-  lazyLoad: 1
+  baseSourceExt: _base
+  lazyLoad: 0

@@ -21,11 +21,11 @@ namespace Cirilla.CEditor
         {
             ViewEntity viewEntity = (ViewEntity)target;
             GameObject prefabObject = viewEntity.gameObject;
-            string prefabPath = PrefabStageUtility.GetPrefabStage(prefabObject)?.assetPath??AssetDatabase.GetAssetPath(prefabObject);
+            string prefabPath = PrefabStageUtility.GetPrefabStage(prefabObject)?.assetPath??string.Empty;
 
             if (prefabPath == string.Empty)
             {
-                EditorGUILayout.HelpBox("请在预制体中进行资源收集", MessageType.Warning);
+                EditorGUILayout.HelpBox("请进入预制体中进行资源收集", MessageType.Warning);
                 return;
             }
 
@@ -43,7 +43,7 @@ namespace Cirilla.CEditor
             EditorGUILayout.EndFadeGroup();
             EditorGUILayout.EndVertical();
 
-            if (resultObjct != null && resultObjct != viewEntity.gameObject && !viewEntity.ContainGo(resultObjct))
+            if (resultObjct != null && resultObjct != viewEntity.gameObject && !viewEntity.ContainGo(resultObjct) && resultObjct.transform.root.gameObject == viewEntity.gameObject)
             {
                 viewEntity.viewIndexInfos.Add(new ViewIndexInfo(FindKey(new List<string>(viewEntity.GetKeys()), resultObjct.name), resultObjct));
                 EditorUtility.SetDirty(target);
@@ -105,7 +105,16 @@ namespace Cirilla.CEditor
             if (!monoScript.text.Replace(" ", "").Contains($"bindedPath=\"{resPath}\""))
             {
                 EditorUtil.UnLoadAsset(monoScript);
-                EditorGUILayout.HelpBox("预制体重名冲突，无法生成代码:\n" + assetPath, MessageType.Error);
+                EditorGUILayout.HelpBox("出现预制体重名冲突:\n" + assetPath, MessageType.Error);
+                if (GUILayout.Button("覆盖代码(谨慎)", "flow node hex 6", GUILayout.Width(EditorGUIUtility.currentViewWidth - 40), GUILayout.Height(40)))
+                {
+                    string deleteDir = Path.GetDirectoryName(mainCodePath);
+                    Directory.Delete(deleteDir, true);
+                    File.Delete(deleteDir + ".meta");
+                    WriteMainCode(mainCodePath, prefabObject.name);
+                    WriteResourceCode(resourceCodePath, resPath, viewEntity, prefabObject.name);
+                    AssetDatabase.Refresh();
+                }
                 return;
             }
 
@@ -208,7 +217,7 @@ namespace Cirilla.CEditor
             $"        private {gameObjectName} {codeViewPrefabName};" + "\n" +
             $"        private {gameObjectName} {codeViewGameObjectName};" + "\n" + "\n";
             foreach (ViewIndexInfo viewIndexInfo in viewEntity.viewIndexInfos) 
-                code += $"        public {gameObjectName} {viewIndexInfo.key};" + "\n";
+                code += $"        private {gameObjectName} {viewIndexInfo.key};" + "\n";
 
             code +=
             "        public void Init()" + "\n" +

@@ -289,6 +289,9 @@ namespace Cirilla
 #if UNITY_EDITOR
         private T LazyLoadAsset<T>(string path) where T : Object
         {
+            if (assets.TryGetValue(path, out AssetInfo assetInfo))
+                return (T)assetInfo.obj;
+
             T obj = UnityEditor.AssetDatabase.LoadAssetAtPath<T>($"{Util.devPath}/{Util.rawResourceFolder}/{path}");
             if (obj == null)
                 return null;
@@ -300,6 +303,12 @@ namespace Cirilla
 
         private void LazyLoadAssetAsync<T>(string path, Action<T> callBack) where T : Object
         {
+            if (assets.TryGetValue(path, out AssetInfo assetInfo))
+            {
+                callBack((T)assetInfo.obj);
+                return;
+            }
+
             T obj = UnityEditor.AssetDatabase.LoadAssetAtPath<T>($"{Util.devPath}/{Util.rawResourceFolder}/{path}");
             callBack(obj);
             if (obj == null)

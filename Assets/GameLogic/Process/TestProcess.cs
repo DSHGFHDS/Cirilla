@@ -5,13 +5,6 @@ namespace GameLogic
 {
     public class TestProcess : AProcessBase
     {
-        #region 模块
-        [Dependency] IResModule resModule;
-        [Dependency] ICSVModule csvModule;
-        [Dependency] IMVCModule mVCModule;
-        [Dependency] IGoPoolModule goPoolModule;
-        #endregion
-
         #region Controller
         [Controller] TestController testController;
         #endregion
@@ -32,7 +25,22 @@ namespace GameLogic
         #region 心跳帧
         public override void OnInputUpdate()
         {
+            if(Input.GetKeyDown(KeyCode.W))
+                testController.SetSlotWhateverColor(Slot.Slot1);
+
+            if (Input.GetKeyDown(KeyCode.A))
+                testController.SetSlotWhateverColor(Slot.Slot2);
+
+            if (Input.GetKeyDown(KeyCode.D))
+                testController.SetSlotWhateverColor(Slot.Slot3);
+
+            if (Input.GetKeyDown(KeyCode.S))
+                testController.SetSlotWhateverColor(Slot.Slot4);
+
+            if (Input.GetKeyDown(KeyCode.F))
+                testController.PlaySound();
         }
+
         public override void OnLogicUpdatePre()
         {
         }

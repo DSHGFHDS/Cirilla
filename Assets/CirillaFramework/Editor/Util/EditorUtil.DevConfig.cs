@@ -204,6 +204,26 @@ namespace Cirilla.CEditor
             }
         }
 
+        public static string baseSourceExt
+        {
+            get
+            {
+                DevConfig devConfig = LoadAssetFromResources<DevConfig>(DevConfigAssetPath);
+                string ext = devConfig.baseSourceExt;
+                UnLoadAsset(devConfig);
+                return ext != string.Empty ? ext.ToLower() : (baseSourceExt = "_base");
+            }
+
+            set
+            {
+                DevConfig devConfig = LoadAssetFromResources<DevConfig>(DevConfigAssetPath);
+                devConfig.customLoadExt = value;
+                SaveAsset(devConfig);
+                UnLoadAsset(devConfig);
+            }
+        }
+
+
         public static bool lazyLoad
         {
             get

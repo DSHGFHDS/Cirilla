@@ -1,0 +1,47 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6e6b2e4538ccca94385d638bfe81f0f0, type: 3}
+  m_Name: TestScritableData
+  m_EditorClassIdentifier: 
+  dataList:
+  - dataList:
+    - dataType: 0
+      intValue: 12412
+      longValue: 0
+      floatValue: 0
+      doubleValue: 0
+      boolValue: 0
+      stringValue: 
+      ObjectValue: {fileID: 0}
+      instanceInfo: 
+      colorValue: {r: 1, g: 1, b: 1, a: 1}
+      vecotor2Value: {x: 0, y: 0}
+      vecotor3Value: {x: 0, y: 0, z: 0}
+    init: 1
+    foldout: 1
+    key: HHHH
+  - dataList:
+    - dataType: 5
+      intValue: 0
+      longValue: 0
+      floatValue: 0
+      doubleValue: 0
+      boolValue: 0
+      stringValue: asdasdawd
+      ObjectValue: {fileID: 0}
+      instanceInfo: 
+      colorValue: {r: 1, g: 1, b: 1, a: 1}
+      vecotor2Value: {x: 0, y: 0}
+      vecotor3Value: {x: 0, y: 0, z: 0}
+    init: 1
+    foldout: 1
+    key: DDDDD
