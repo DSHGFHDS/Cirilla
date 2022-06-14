@@ -1,3 +1,5 @@
+#QQ群 765086420
+
 # Cirilla
 
 与huatuo热更进行适配的unity3d开发框架（已加入HuaTuo的upm工具，点击工具栏Huatuo进行安装）。
