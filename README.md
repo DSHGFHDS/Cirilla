@@ -2,9 +2,11 @@ QQ群 765086420
 
 # Cirilla
 
+![Cirilla.png](Cirilla/Cirilla.png)
+
 与huatuo热更进行适配的unity3d开发框架（已加入HuaTuo的upm工具，点击工具栏Huatuo进行安装）。
 
-基础模块以依赖注入与控制反转的方式进行加载和使用(IocContainer)。
+基础模块以控制反转和依赖注入的方式进行加载和使用(IocContainer)。
 
 因为适配huatuo的原因，开发目录是以单独的程序集进行的(提供了相应的生成器和Editor菜单)，入口以流程状态机的形式提供。
 
@@ -27,4 +29,3 @@ CSV模块 ->ICSVModule
 声音模块 ->IAudioModule
 
 后续会根据业务情况总结迭代更多可复用的功能
-

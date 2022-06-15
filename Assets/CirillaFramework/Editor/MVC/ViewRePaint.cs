@@ -45,7 +45,7 @@ namespace Cirilla.CEditor
 
             if (resultObjct != null && resultObjct != viewEntity.gameObject && !viewEntity.ContainGo(resultObjct) && resultObjct.transform.root.gameObject == viewEntity.gameObject)
             {
-                viewEntity.viewIndexInfos.Add(new ViewIndexInfo(FindKey(new List<string>(viewEntity.GetKeys()), resultObjct.name), resultObjct));
+                viewEntity.viewIndexInfos.Add(new ViewIndexInfo(FindKey(new List<string>(viewEntity.GetKeys()), resultObjct.name), resultObjct, resultObjct));
                 EditorUtility.SetDirty(target);
             }
 
@@ -60,6 +60,10 @@ namespace Cirilla.CEditor
                         EditorUtility.SetDirty(target);
                         continue;
                     }
+
+                    if (viewEntity.viewIndexInfos[i].pointObj == null)
+                        viewEntity.viewIndexInfos[i].pointObj = viewEntity.viewIndexInfos[i].go;
+
                     EditorGUILayout.BeginHorizontal("HelpBox");
                     string text = EditorGUILayout.TextField(viewEntity.viewIndexInfos[i].key, GUILayout.Height(20), GUILayout.Width(120));
                     if (text != string.Empty && text != viewEntity.viewIndexInfos[i].key && !viewEntity.ContainKey(text) && Util.IsMatchStatementRule(text)
@@ -69,9 +73,35 @@ namespace Cirilla.CEditor
                         EditorUtility.SetDirty(target);
                         break;
                     }
+
+                    List<Object> objs = new List<Object>();
+                    objs.Add(viewEntity.viewIndexInfos[i].go);
+                    objs.AddRange(viewEntity.viewIndexInfos[i].go.transform.GetComponents(typeof(Component)));
+                    int currentOptionIndex = 0;
+                    for (int j = 0; j < objs.Count; j++)
+                    {
+                        if (objs[j] != viewEntity.viewIndexInfos[i].pointObj)
+                            continue;
+
+                        currentOptionIndex = j;
+                        break;
+                    }
+                    string[] options = new string[objs.Count];
+                    for (int j = 0; j < options.Length; j++)
+                        options[j] = objs[j].GetType().Name;
+
+                    int resultIndex = EditorGUILayout.Popup(currentOptionIndex, options, GUILayout.Height(20), GUILayout.Width(140));
+                    if (viewEntity.viewIndexInfos[i].pointObj != objs[resultIndex])
+                    {
+                        viewEntity.viewIndexInfos[i].pointObj = objs[resultIndex];
+                        EditorUtility.SetDirty(target);
+                        break;
+                    }
+
                     GUI.enabled = false;
-                    EditorGUILayout.ObjectField(viewEntity.viewIndexInfos[i].go, typeof(Object));
+                    EditorGUILayout.ObjectField(viewEntity.viewIndexInfos[i].pointObj, typeof(Object));
                     GUI.enabled = true;
+
                     if (GUILayout.Button("-", GUILayout.Height(20), GUILayout.Width(20)))
                     {
                         viewEntity.viewIndexInfos.Remove(viewEntity.viewIndexInfos[i]);
@@ -207,7 +237,8 @@ namespace Cirilla.CEditor
             string gameObjectName = typeof(GameObject).Name;
             string code =
             "using Cirilla;" + "\n" +
-            "using UnityEngine;" + "\n" + "\n" +
+            "using UnityEngine;" + "\n" +
+            "using UnityEngine.UI;" + "\n" + "\n" +
             $"namespace {Path.GetFileName(EditorUtil.devPath)}" + "\n" +
             "{" + "\n" +
             $"    public partial class {className} : {typeof(IView).Name}" + "\n" +
@@ -217,7 +248,7 @@ namespace Cirilla.CEditor
             $"        private {gameObjectName} {codeViewPrefabName};" + "\n" +
             $"        private {gameObjectName} {codeViewGameObjectName};" + "\n" + "\n";
             foreach (ViewIndexInfo viewIndexInfo in viewEntity.viewIndexInfos) 
-                code += $"        private {gameObjectName} {viewIndexInfo.key};" + "\n";
+                code += $"        private {viewIndexInfo.pointObj.GetType().Name} {viewIndexInfo.key};" + "\n";
 
             code +=
             "        public void Init()" + "\n" +
@@ -233,7 +264,7 @@ namespace Cirilla.CEditor
                 code += $"            {typeof(ViewEntity).Name} {viewEntityName} = {codeViewGameObjectName}.GetComponent<{typeof(ViewEntity).Name}>();" + "\n";
 
             foreach (ViewIndexInfo viewIndexInfo in viewEntity.viewIndexInfos)
-                code += $"            {viewIndexInfo.key} = {viewEntityName}.GetGo(\"{viewIndexInfo.key}\");" + "\n";
+                code += $"            {viewIndexInfo.key} = ({viewIndexInfo.pointObj.GetType().Name}){viewEntityName}.GetPointObj(\"{viewIndexInfo.key}\");" + "\n";
 
             code +=
             "            VeiwInit();" + "\n" +

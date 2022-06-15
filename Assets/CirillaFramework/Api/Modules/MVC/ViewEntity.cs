@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using UnityEngine;
+using Object = UnityEngine.Object;
 
 namespace Cirilla
 {
@@ -38,6 +39,18 @@ namespace Cirilla
             return false;
         }
 
+        public Object GetPointObj(string key)
+        {
+            foreach (ViewIndexInfo viewIndexInfo in viewIndexInfos)
+            {
+                if (viewIndexInfo.key != key)
+                    continue;
+
+                return viewIndexInfo.pointObj;
+            }
+            return null;
+        }
+
         public GameObject GetGo(string key)
         {
             foreach (ViewIndexInfo viewIndexInfo in viewIndexInfos)
@@ -71,7 +84,7 @@ namespace Cirilla
 
             return keys;
         }
-
+        
         public GameObject[] GetGos()
         {
             GameObject[] gos = new GameObject[viewIndexInfos.Count];
@@ -79,6 +92,15 @@ namespace Cirilla
                 gos[i] = viewIndexInfos[i].go;
 
             return gos;
+        }
+
+        public Object[] GetPointObjs()
+        {
+            Object[] objs = new Object[viewIndexInfos.Count];
+            for (int i = 0; i < viewIndexInfos.Count; i++)
+                objs[i] = viewIndexInfos[i].pointObj;
+
+            return objs;
         }
     }
 }

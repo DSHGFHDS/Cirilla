@@ -1,5 +1,6 @@
 using Cirilla;
 using UnityEngine;
+using UnityEngine.UI;
 
 namespace GameLogic
 {
@@ -12,12 +13,10 @@ namespace GameLogic
         private GameObject viewPrefab;
         private GameObject viewGameObjcet;
 
-        private GameObject helloWord;
-        private GameObject heyPicture;
-        private GameObject slot1;
-        private GameObject slot2;
-        private GameObject slot3;
-        private GameObject slot4;
+        private Image slot1;
+        private Image slot2;
+        private Image slot3;
+        private Image slot4;
         public void Init()
         {
             viewPrefab = resModule.LoadAsset<GameObject>(bindedPath);
@@ -28,12 +27,10 @@ namespace GameLogic
             }
             viewGameObjcet = Core.CirillaGiveBirth(viewPrefab);
             ViewEntity viewEntity = viewGameObjcet.GetComponent<ViewEntity>();
-            helloWord = viewEntity.GetGo("helloWord");
-            heyPicture = viewEntity.GetGo("heyPicture");
-            slot1 = viewEntity.GetGo("slot1");
-            slot2 = viewEntity.GetGo("slot2");
-            slot3 = viewEntity.GetGo("slot3");
-            slot4 = viewEntity.GetGo("slot4");
+            slot1 = (Image)viewEntity.GetPointObj("slot1");
+            slot2 = (Image)viewEntity.GetPointObj("slot2");
+            slot3 = (Image)viewEntity.GetPointObj("slot3");
+            slot4 = (Image)viewEntity.GetPointObj("slot4");
             VeiwInit();
         }
         public void Dispose()

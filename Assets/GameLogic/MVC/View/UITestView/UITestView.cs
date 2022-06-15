@@ -21,27 +21,27 @@ namespace GameLogic
 
         public void SetSlotColor(int index, Color color)
         {
-            Image go = null;
+            Image image = null;
             switch (index)
             {
                 case 1:
-                    go = slot1.GetComponent<Image>();
+                    image = slot1;
                     break;
                 case 2:
-                    go = slot2.GetComponent<Image>();
+                    image = slot2;
                     break;
                 case 3:
-                    go = slot3.GetComponent<Image>();
+                    image = slot3;
                     break;
                 case 4:
-                    go = slot4.GetComponent<Image>(); 
+                    image = slot4; 
                     break;
             }
-
-            if (go == null)
+            
+            if (image == null)
                 return;
 
-            go.color = color;
+            image.color = color;
         }
         #endregion
     }
