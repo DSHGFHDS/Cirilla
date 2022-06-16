@@ -8,32 +8,20 @@ namespace Cirilla
     public abstract class AProcessBase : IProcess
     {
         private Action<Enum, object[]> changeCallback;
-        private Func<IEnumerator, Coroutine> startCoroutinCallback;
-        private Action<Coroutine> stopCoroutinCallback;
-        private Action stopAllCoroutinsCallback;
-        public void InjectCallback(Action<Enum, object[]> changeCallback, Func<IEnumerator, Coroutine> startCoroutinCallback, Action<Coroutine> stopCoroutinCallback, Action stopAllCoroutinsCallback)
-        {
-            this.changeCallback = changeCallback;
-            this.startCoroutinCallback = startCoroutinCallback;
-            this.stopCoroutinCallback = stopCoroutinCallback;
-            this.stopAllCoroutinsCallback = stopAllCoroutinsCallback;
-        }
 
-        public void Change(Enum processEnum, params object[] args){
-            changeCallback(processEnum, args);
-        }
+        public void InjectCallback(Action<Enum, object[]> changeCallback) => this.changeCallback = changeCallback;
 
-        public Coroutine StartCoroutine(IEnumerator routine){
-            return startCoroutinCallback(routine);
-        }
+        public void Change(Enum processEnum, params object[] args) => changeCallback(processEnum, args);
 
-        public void StopCoroutine(Coroutine routine){
-            stopCoroutinCallback(routine);
-        }
+        public Coroutine StartCoroutine(float time, Action callBack) => Core.StartCoroutine(time, callBack);
 
-        public void StopAllCoroutines(){
-            stopAllCoroutinsCallback();
-        }
+        public Coroutine StartCoroutine(float time, Action<object[]> callBack, params object[] args) => Core.StartCoroutine(time, callBack, args);
+
+        public Coroutine StartCoroutine(IEnumerator routine) => Core.StartCoroutine(routine);
+
+        public void StopCoroutine(Coroutine routine) => Core.StopCoroutine(routine);
+
+        public void StopAllCoroutines() => StopAllCoroutines();
 
         public abstract void Init();
         public abstract void OnEnter(params object[] args);
@@ -51,6 +39,5 @@ namespace Cirilla
             Application.Quit();
 #endif
         }
-
     }
 }

@@ -24,6 +24,7 @@ namespace Cirilla
         {
             InitedProcesses = new List<IProcess>();
             messageQueue = new ConcurrentQueue<MessageInfo>();
+            string assemblyName = Util.devPath.Substring("Assets/".Length);
 #if UNITY_EDITOR
             string dllPath = Environment.CurrentDirectory.Replace("\\", "/") + $"/Library/ScriptAssemblies/{Util.devPath.Substring("Assets/".Length)}.dll";
             if (!File.Exists(dllPath))
@@ -34,7 +35,6 @@ namespace Cirilla
             byte[] dllBytes = File.ReadAllBytes(dllPath);
             
 #elif UNITY_STANDALONE_WIN || UNITY_STANDALONE_WIN
-            string assemblyName = Util.devPath.Substring("Assets/".Length);
             byte[] dllBytes = containerIns.Resolve<IResModule>().LoadAsset<TextAsset>($"{assemblyName}{Util.preLoadExt}/{assemblyName}.bytes")?.bytes;
 #elif UNITY_ANDROID
 #elif ENABLE_MICROPHONE
@@ -43,19 +43,15 @@ namespace Cirilla
                 return;
 
             Assembly assembly = Assembly.Load(dllBytes);
+            Type type = assembly.GetType(assemblyName+".ProcessType");
 
-            Type type = null;
-            Type[] types = assembly.GetTypes();
-            for (int i = 0; i < types.Length; i++)
+            if(type == null)
             {
-                if (types[i].Name != "ProcessType")
-                    continue;
-
-                type = types[i];
-                break;
+                CiriDebugger.LogError("ProcessType域名空间不正确");
+                return;
             }
 
-            FieldInfo[] fieldInfos = type?.GetFields(BindingFlags.Static | BindingFlags.Public);
+            FieldInfo[] fieldInfos = type.GetFields(BindingFlags.Static | BindingFlags.Public);
             if (fieldInfos == null || fieldInfos.Length <= 0)
             {
                 CiriDebugger.LogError("缺少可载入流程");
@@ -83,7 +79,7 @@ namespace Cirilla
 
             if (!InitedProcesses.Contains(process))
             {
-                process.InjectCallback(Change, base.StartCoroutine, base.StopCoroutine, base.StopAllCoroutines);
+                process.InjectCallback(Change);
                 process.Init();
                 InitedProcesses.Add(process);
                 mVCModule.InjectController(containerIns.GetContentInfo<IProcess>(processEnum.ToString()));

@@ -43,6 +43,7 @@ namespace GameLogic
 
         public override void OnLogicUpdatePre()
         {
+            
         }
         public override void OnLogicUpdatePost()
         {

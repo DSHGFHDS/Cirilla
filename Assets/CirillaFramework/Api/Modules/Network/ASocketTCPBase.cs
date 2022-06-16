@@ -5,14 +5,14 @@ using System.Threading.Tasks;
 
 namespace Cirilla
 {
-    public abstract class ASocketBase: INetBase
+    public abstract class ASocketTCPBase: INetBase
     {
         public string ip { get; private set; }
         public int port { get; private set; }
         public int bufferLen;
         public bool isConnected { get { return socket == null; } }
         private Socket socket;
-        protected ASocketBase(string ip, int port, int bufferLen)
+        protected ASocketTCPBase(string ip, int port, int bufferLen)
         {
             this.ip = ip;
             this.port = port;
