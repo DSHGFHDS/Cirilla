@@ -7,6 +7,6 @@ namespace Cirilla
     {
         void Disconnect();
         void Connect(INetBase netBase);
-        void HttpRequest(string Url, Action<byte[]> callBack);
+        void HttpRequest(string Url, Action<byte[]> callBack, string method = "GET");
     }
 }

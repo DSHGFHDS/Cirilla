@@ -30,14 +30,16 @@ namespace Cirilla
             netHandle.Disconnect();
         }
 
-        public async void HttpRequest(string Url, Action<byte[]> callBack)
+        public async void HttpRequest(string Url, Action<byte[]> callBack, string method)
         {
             if (string.IsNullOrEmpty(Url))
                 return;
 
-            byte[] bytes = await Task<byte[]>.Run(() =>
+            byte[] bytes = await Task.Run(() =>
             {
                 HttpWebRequest webRequest = (HttpWebRequest)WebRequest.Create(Url);
+                webRequest.Method = method;
+
                 HttpWebResponse res = (HttpWebResponse)webRequest.GetResponse();
 
                 if (res.StatusCode != HttpStatusCode.OK)
