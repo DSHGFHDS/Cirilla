@@ -21,23 +21,16 @@ namespace GameLogic
 
         public void SetSlotColor(int index, Color color)
         {
-            Image image = null;
-            switch (index)
+            //C#8.0 switch(index) 变形 语法糖
+            Image image = index switch
             {
-                case 1:
-                    image = slot1;
-                    break;
-                case 2:
-                    image = slot2;
-                    break;
-                case 3:
-                    image = slot3;
-                    break;
-                case 4:
-                    image = slot4; 
-                    break;
-            }
-            
+                1 => slot1,
+                2 => slot2,
+                3 => slot3,
+                4 => slot4,
+                _ =>null
+            };
+
             if (image == null)
                 return;
 

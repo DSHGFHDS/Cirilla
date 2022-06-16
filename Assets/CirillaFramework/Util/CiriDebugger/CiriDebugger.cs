@@ -9,6 +9,7 @@ namespace Cirilla
         public static readonly string logID = "------------------------------------CirillaLogger------------------------------------";
         public static void Log(object message, LogColorType color = LogColorType.Pink)
         {
+            
 #if UNITY_EDITOR
             Debug.Log(FormatMessage(message, color));
 #endif
