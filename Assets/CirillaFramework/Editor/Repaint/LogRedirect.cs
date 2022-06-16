@@ -3,6 +3,7 @@ using System.Reflection;
 using UnityEditor;
 using UnityEditor.Callbacks;
 using UnityEditorInternal;
+using UnityEngine;
 
 namespace Cirilla.CEditor
 {
@@ -48,9 +49,16 @@ namespace Cirilla.CEditor
             if (buffer.Length < 2)
                 return false;
 
+            MonoScript monoScript = AssetDatabase.LoadAssetAtPath<MonoScript>("Assets/CirillaFramework/Util/CiriDebugger/CiriDebugger.cs");
+            int debuggerInstanceID = monoScript.GetInstanceID();
+            Resources.UnloadAsset(monoScript);
+
+            if (debuggerInstanceID != instanceID)
+                return false;
+
             buffer = buffer[1].Split('\n');
             InternalEditorUtility.OpenFileAtLineExternal(buffer[0], int.Parse(buffer[1]));
-
+            
             return true;
         }
     }
