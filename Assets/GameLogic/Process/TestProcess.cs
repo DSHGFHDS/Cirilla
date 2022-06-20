@@ -1,5 +1,4 @@
 using Cirilla;
-using System.Threading.Tasks;
 using UnityEngine;
 
 namespace GameLogic
