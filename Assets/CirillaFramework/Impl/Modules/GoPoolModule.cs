@@ -120,6 +120,15 @@ namespace Cirilla
 
             pools.Remove(poolname);
         }
+        public void Shrink()
+        {
+            foreach (GoPoolData goPoolData in pools.Values)
+            {
+                GameObject go;
+                while ((go = goPoolData.validPool.Dequeue()) != null)
+                    GameObject.Destroy(go);
+            }
+        }
 
         public void Clear()
         {
