@@ -20,7 +20,16 @@ ExportedObj/
 *.pidb
 *.booproj
 *.svd
+*.pdb
+*.opendb
 *.vsconfig
+
+# Visual Studio cache directory
+.vs/
+ 
+# Visual Studio Code cache directory
+.vscode/
+
 
 
 # Unity3D generated meta files
@@ -32,4 +41,3 @@ sysinfo.txt
 # Builds
 *.apk
 *.unitypackage
-*.vsidx
