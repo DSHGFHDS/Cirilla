@@ -19,7 +19,7 @@ namespace GameLogic
             GameObject.Destroy(earGo);
         }
 
-        public void SetSlotColor(int index, Color color)
+        public void SetSlotColor(int index, ShowColor showColor)
         {
             //C#8.0 switch(index) 变形 语法糖
             Image image = index switch
@@ -34,7 +34,7 @@ namespace GameLogic
             if (image == null)
                 return;
 
-            image.color = color;
+            image.color = showColor.color;
         }
         #endregion
     }

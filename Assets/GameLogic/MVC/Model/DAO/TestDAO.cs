@@ -17,6 +17,7 @@ namespace GameLogic
             colors.Clear();
         }
 
+        //假设以下数据来源于数据库、csv、js等本地表
         private void LoadData()
         {
             colors.Add(Color.yellow);

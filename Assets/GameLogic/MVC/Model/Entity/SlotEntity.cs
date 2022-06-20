@@ -1,5 +1,5 @@
 ﻿
-public enum Slot
+public enum SlotEntity
 {
     Slot1 = 1,
     Slot2,

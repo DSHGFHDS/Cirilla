@@ -30,7 +30,7 @@ namespace GameLogic
             mVCModule.Remove<UITestView>();
         }
 
-        public void SetSlotWhateverColor(Slot slot)
+        public void SetSlotWhateverColor(SlotEntity slot)
         {
             uiTestView.SetSlotColor((int)slot, testModel.GetRandomClore());
         }

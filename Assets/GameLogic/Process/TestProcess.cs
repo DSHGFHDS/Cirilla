@@ -30,16 +30,16 @@ namespace GameLogic
         public override void OnInputUpdate()
         {
             if(Input.GetKeyDown(KeyCode.W))
-                testController.SetSlotWhateverColor(Slot.Slot1);
+                testController.SetSlotWhateverColor(SlotEntity.Slot1);
 
             if (Input.GetKeyDown(KeyCode.A))
-                testController.SetSlotWhateverColor(Slot.Slot2);
+                testController.SetSlotWhateverColor(SlotEntity.Slot2);
 
             if (Input.GetKeyDown(KeyCode.D))
-                testController.SetSlotWhateverColor(Slot.Slot3);
+                testController.SetSlotWhateverColor(SlotEntity.Slot3);
 
             if (Input.GetKeyDown(KeyCode.S))
-                testController.SetSlotWhateverColor(Slot.Slot4);
+                testController.SetSlotWhateverColor(SlotEntity.Slot4);
 
             if (Input.GetKeyDown(KeyCode.F))
                 testController.PlaySound();
