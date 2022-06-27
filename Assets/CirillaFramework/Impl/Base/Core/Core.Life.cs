@@ -24,6 +24,12 @@ namespace Cirilla
         {
             InitedProcesses = new List<IProcess>();
             messageQueue = new ConcurrentQueue<MessageInfo>();
+            if (string.IsNullOrEmpty(Util.devPath))
+            {
+                CiriDebugger.LogWarning("缺少项目");
+                return;
+            }
+
             string assemblyName = Util.devPath.Substring("Assets/".Length);
 #if UNITY_EDITOR
             string dllPath = Environment.CurrentDirectory.Replace("\\", "/") + $"/Library/ScriptAssemblies/{Util.devPath.Substring("Assets/".Length)}.dll";
@@ -33,11 +39,9 @@ namespace Cirilla
                 return;
             }
             byte[] dllBytes = File.ReadAllBytes(dllPath);
-            
-#elif UNITY_STANDALONE_WIN || UNITY_STANDALONE_WIN
+
+#else
             byte[] dllBytes = containerIns.Resolve<IResModule>().LoadAsset<TextAsset>($"{assemblyName}{Util.preLoadExt}/{assemblyName}.bytes")?.bytes;
-#elif UNITY_ANDROID
-#elif ENABLE_MICROPHONE
 #endif
             if (dllBytes == null)
                 return;
@@ -45,7 +49,7 @@ namespace Cirilla
             Assembly assembly = Assembly.Load(dllBytes);
             Type type = assembly.GetType(assemblyName+".ProcessType");
 
-            if(type == null)
+            if (type == null)
             {
                 CiriDebugger.LogError("ProcessType域名空间不正确");
                 return;

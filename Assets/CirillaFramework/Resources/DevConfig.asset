@@ -23,4 +23,4 @@ MonoBehaviour:
   preLoadExt: _public
   customLoadExt: _custom
   baseSourceExt: _base
-  lazyLoad: 1
+  lazyLoad: 0

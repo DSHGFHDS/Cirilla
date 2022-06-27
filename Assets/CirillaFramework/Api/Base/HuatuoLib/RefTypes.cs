@@ -81,6 +81,8 @@ public class RefTypes : MonoBehaviour
     }
     private void RefContainer()
     {
+        List<Color> a = new List<Color>();
+
         List<object> b = new List<object>()
         {
             new Dictionary<int, long>(),

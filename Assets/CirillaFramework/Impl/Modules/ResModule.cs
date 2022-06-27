@@ -9,7 +9,8 @@ namespace Cirilla
 {
     public class ResModule : IResModule
     {
-        private static readonly string resourcesPath = Application.streamingAssetsPath + "/" + Util.buildResourcesFolder;
+        private string streamingAssets = Application.streamingAssetsPath + "/" + Util.buildResourcesFolder;
+        private string persistentData = Application.persistentDataPath + "/" + Util.buildResourcesFolder;
 
         private Dictionary<string, AssetInfo> assets;
         private Dictionary<string, AssetBundleInfo> bundles;
@@ -22,28 +23,13 @@ namespace Cirilla
                 return;
 #endif
             bundles = new Dictionary<string, AssetBundleInfo>();
-            if (!Directory.Exists(resourcesPath))
-                return;
-
-            DirectoryInfo directoryInfo = new DirectoryInfo(resourcesPath);
-            FileInfo[] fileInfos = directoryInfo.GetFiles();
-            foreach(FileInfo fileInfo in fileInfos)
-            {
-                if (fileInfo.Extension != Util.abExtension)
-                    continue;
-
-                string bundleName = Path.GetFileNameWithoutExtension(fileInfo.Name);
-                if (!bundleName.EndsWith(Util.preLoadExt))
-                    continue;
-
-                AssetBundle assetBundle = AssetBundle.LoadFromFile(fileInfo.FullName);
-                bundles.Add(bundleName, new AssetBundleInfo(assetBundle));
-            }
-
+            LoadPublicRes(streamingAssets);
+            LoadPublicRes(persistentData);
         }
 
-        public T LoadAsset<T>(string path) where T : Object
+        public T LoadAsset<T>(string path, PathBase pathBase) where T : Object
         {
+
 #if UNITY_EDITOR
             if (Util.lazyLoad)
                 return LazyLoadAsset<T>(path);
@@ -62,14 +48,15 @@ namespace Cirilla
                     return null;
                 }
 
-                string loadPath = resourcesPath + "/" + bundleName + Util.abExtension;
+                string loadPath = GetPathBase(pathBase) + "/" + bundleName + Util.abExtension;
+#if !UNITY_ANDROID
                 if (!File.Exists(loadPath))
                 {
                     CiriDebugger.LogError($"资源:{path}所在包体不存在");
                     return null;
                 }
-
-                assetBundleInfo = new AssetBundleInfo(AssetBundle.LoadFromFile(resourcesPath + "/" + bundleName + Util.abExtension));
+#endif
+                assetBundleInfo = new AssetBundleInfo(AssetBundle.LoadFromFile(GetPathBase(pathBase) + "/" + bundleName + Util.abExtension));
                 bundles.Add(bundleName, assetBundleInfo);
             }
 
@@ -88,7 +75,7 @@ namespace Cirilla
             return (T)assetInfo?.obj;
         }
 
-        public void LoadAssetAsync<T>(string path, Action<T> callBack) where T : Object
+        public void LoadAssetAsync<T>(string path, Action<T> callBack, PathBase pathBase) where T : Object
         {
 #if UNITY_EDITOR
             if (Util.lazyLoad)
@@ -115,16 +102,19 @@ namespace Cirilla
             if (bundleName.EndsWith(Util.customLoadExt))
             {
                 CiriDebugger.LogError($"资源:{path}在custom包中，需要先预载包体:" + path.Replace("/" + Path.GetFileName(path), ""));
+                callBack(null);
                 return;
             }
 
-            string loadPath = resourcesPath + "/" + bundleName + Util.abExtension;
+            string loadPath = GetPathBase(pathBase) + "/" + bundleName + Util.abExtension;
+#if !UNITY_ANDROID
             if (!File.Exists(loadPath))
             {
                 CiriDebugger.LogError($"资源:{path}所在包体不存在");
+                callBack(null);
                 return;
             }
-
+#endif
             Core.StartCoroutine(LoadAssetBundleAsync(loadPath, (assetBundle)=>
             {
                 assetBundleInfo = new AssetBundleInfo(assetBundle);
@@ -134,7 +124,7 @@ namespace Cirilla
 
         }
 
-        public void LoadCustom(string path)
+        public void LoadCustom(string path, PathBase pathBase)
         {
 #if UNITY_EDITOR
             if (Util.lazyLoad)
@@ -152,16 +142,17 @@ namespace Cirilla
             if (bundles.ContainsKey(bundleName))
                 return;
 
-            string loadPath = resourcesPath + "/" + bundleName + Util.abExtension;
+            string loadPath = GetPathBase(pathBase) + "/" + bundleName + Util.abExtension;
+#if !UNITY_ANDROID
             if (!File.Exists(loadPath))
             {
                 CiriDebugger.LogError($"资源:{path}所在包体不存在");
                 return;
             }
-
+#endif
             bundles.Add(bundleName, new AssetBundleInfo(AssetBundle.LoadFromFile(loadPath)));
         }
-        public void LoadCustomAsync(string path)
+        public void LoadCustomAsync(string path, PathBase pathBase)
         {
 #if UNITY_EDITOR
             if (Util.lazyLoad)
@@ -179,19 +170,20 @@ namespace Cirilla
             if (bundles.ContainsKey(bundleName))
                 return;
 
-            string loadPath = resourcesPath + "/" + bundleName + Util.abExtension;
+            string loadPath = GetPathBase(pathBase) + "/" + bundleName + Util.abExtension;
+#if !UNITY_ANDROID
             if (!File.Exists(loadPath))
             {
                 CiriDebugger.LogError($"资源:{path}所在包体不存在");
                 return;
             }
-
+#endif
             Core.StartCoroutine(LoadAssetBundleAsync(loadPath, (assetBundle) => {
                 bundles.Add(bundleName, new AssetBundleInfo(assetBundle));
             }));
         }
 
-        public void UnLoadCustom(string path)
+        public void UnLoadCustom(string path, PathBase pathBase)
         {
 #if UNITY_EDITOR
             if (Util.lazyLoad)
@@ -369,6 +361,34 @@ namespace Cirilla
                 return dirName.GetHashCode() + Util.customLoadExt;
 
             return dirName.GetHashCode().ToString();
+        }
+
+        private string GetPathBase(PathBase pathBase) => pathBase switch
+        {
+                PathBase.StreamingAssetsPath => streamingAssets,
+                PathBase.PersistentDataPath => persistentData,
+                _ => null
+        };
+
+        private void LoadPublicRes(string path)
+        {
+            if (!Directory.Exists(path))
+                return;
+
+            DirectoryInfo directoryInfo = new DirectoryInfo(path);
+            FileInfo[] fileInfos = directoryInfo.GetFiles();
+            foreach (FileInfo fileInfo in fileInfos)
+            {
+                if (fileInfo.Extension != Util.abExtension)
+                    continue;
+
+                string bundleName = Path.GetFileNameWithoutExtension(fileInfo.Name);
+                if (!bundleName.EndsWith(Util.preLoadExt))
+                    continue;
+
+                AssetBundle assetBundle = AssetBundle.LoadFromFile(fileInfo.FullName);
+                bundles.Add(bundleName, new AssetBundleInfo(assetBundle));
+            }
         }
     }
 }

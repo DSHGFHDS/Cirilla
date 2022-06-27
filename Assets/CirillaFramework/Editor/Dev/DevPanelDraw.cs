@@ -50,8 +50,7 @@ namespace Cirilla.CEditor
                     goto NoFolder;
 
                 if (!fullFolder.Contains("Assets") || fullFolder.Contains("Editor") || fullFolder.Contains("Plugins") || fullFolder.Contains("Resources") || fullFolder.Contains("StreamingAssets")
-                     || fullFolder.Contains("Gizmos") || fullFolder.Contains("Editor Default Resources") || fullFolder.Contains("CirillaFramework") || fullFolder.Contains(EditorUtil.rawResourceFolder) || Path.GetDirectoryName(fullFolder).Replace("\\", "/") != Application.dataPath
-                     || fullFolder.Contains(" "))
+                     || fullFolder.Contains("Gizmos") || fullFolder.Contains("Editor Default Resources") || fullFolder.Contains("CirillaFramework") || fullFolder.Contains(EditorUtil.rawResourceFolder) || Path.GetDirectoryName(fullFolder).Replace("\\", "/") != Application.dataPath)
                 {
                     CiriDebugger.LogError("不支持设置该目录为开发目录");
                     goto NoFolder;

@@ -13,9 +13,11 @@ using UnityEditor.Android;
 
 namespace Cirilla.CEditor
 {
-    public class HotFixBuildProcessor : IFilterBuildAssemblies, IPostprocessBuildWithReport, IUnityLinkerProcessor
+    public class HotFixBuildProcessor : IFilterBuildAssemblies, IUnityLinkerProcessor
 #if UNITY_ANDROID
         , IPostGenerateGradleAndroidProject
+#else
+    , IPostprocessBuildWithReport
 #endif
     {
         public int callbackOrder { get; }
