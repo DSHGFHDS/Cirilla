@@ -50,7 +50,8 @@ namespace Cirilla
             loadProcess = LoadProcesses;
             MatchStreamingAssetToPersistent();
 #else
-            LoadProcesses();
+            loadProcess = LoadProcesses;
+            loadHotBuffer?.Invoke();
 #endif
         }
 

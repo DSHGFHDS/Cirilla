@@ -24,5 +24,5 @@ MonoBehaviour:
   preLoadExt: _public
   customLoadExt: _custom
   baseSourceExt: _base
-  lazyLoad: 0
+  lazyLoad: 1
   baseVersion: 10087
