@@ -1,6 +1,7 @@
 ﻿
 using System;
 using System.IO;
+using System.Text;
 using UnityEngine;
 
 namespace Cirilla
@@ -34,11 +35,17 @@ namespace Cirilla
             return null;
         }
 
-        public static void Write(string path, string text)
+        public static string GetMD5(FileStream fileStream)
         {
-            StreamWriter streamWriter = new StreamWriter(path);
-            streamWriter.Write(text);
-            streamWriter.Close();
+
+            System.Security.Cryptography.MD5 md5 = new System.Security.Cryptography.MD5CryptoServiceProvider();
+            byte[] retVal = md5.ComputeHash(fileStream);
+
+            StringBuilder stringBuilder = new StringBuilder();
+            for (int i = 0; i < retVal.Length; i++)
+                stringBuilder.Append(retVal[i].ToString("x2"));
+
+            return stringBuilder.ToString();
         }
     }
 }

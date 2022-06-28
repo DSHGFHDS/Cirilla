@@ -1,0 +1,16 @@
+{
+    "name": "HotBuffer",
+    "rootNamespace": "",
+    "references": [
+        "GUID:fbd00de94f559204fa18124b696cbf74"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

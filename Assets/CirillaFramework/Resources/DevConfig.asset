@@ -20,7 +20,9 @@ MonoBehaviour:
   assetBundleExtension: .pk
   rawResourcesFolder: RawResources
   buildResourcesFolder: BuildResources
+  matchFile: version
   preLoadExt: _public
   customLoadExt: _custom
   baseSourceExt: _base
   lazyLoad: 0
+  baseVersion: 10087

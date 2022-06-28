@@ -60,6 +60,17 @@ namespace Cirilla
             }
         }
 
+        public static string matchFile
+        {
+            get
+            {
+                DevConfig devConfig = Resources.Load<DevConfig>(DevConfigAssetPath);
+                string file = devConfig.matchFile;
+                Resources.UnloadAsset(devConfig);
+                return file;
+            }
+        }
+
         public static string preLoadExt
         {
             get

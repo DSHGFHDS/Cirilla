@@ -6,11 +6,11 @@ namespace Cirilla
 {
     public interface IResModule
     {
-        T LoadAsset<T>(string path, PathBase pathBase = PathBase.StreamingAssetsPath) where T : Object;
-        void LoadAssetAsync<T>(string path, Action<T> callBack, PathBase pathBase = PathBase.StreamingAssetsPath) where T : Object;
-        void LoadCustom(string path, PathBase pathBase = PathBase.StreamingAssetsPath);
-        void LoadCustomAsync(string path, PathBase pathBase = PathBase.StreamingAssetsPath);
-        void UnLoadCustom(string path, PathBase pathBase = PathBase.StreamingAssetsPath);
+        T LoadAsset<T>(string path) where T : Object;
+        void LoadAssetAsync<T>(string path, Action<T> callBack) where T : Object;
+        void LoadCustom(string path);
+        void LoadCustomAsync(string path);
+        void UnLoadCustom(string path);
         void UnLoadAsset(Object obj);
         void Clear();
     }

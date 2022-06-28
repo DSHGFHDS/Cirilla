@@ -62,7 +62,7 @@ namespace Cirilla.CEditor
                     CiriDebugger.LogError("ÇëÑ¡ÔñÄ¿Â¼");
                     goto NoFolder;
                 }
-
+                PlayerSettings.productName = Path.GetFileName(folder);
                 EditorUtil.devPath = folder;
                 CheckFile(fullFolder);
             }

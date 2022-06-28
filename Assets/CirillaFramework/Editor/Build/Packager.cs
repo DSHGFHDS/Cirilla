@@ -10,7 +10,17 @@ namespace Cirilla.CEditor
 {
     public class Packager : EditorWindow
     {
+#if UNITY_ANDROID
+        private static BuildTarget selectedBuildTarget = BuildTarget.Android;
+#elif UNITY_STANDALONE_WIN
         private static BuildTarget selectedBuildTarget = BuildTarget.StandaloneWindows64;
+#elif UNITY_IOS
+        private static BuildTarget selectedBuildTarget = BuildTarget.iOS;
+#elif UNITY_STANDALONE_OSX
+        private static BuildTarget selectedBuildTarget = BuildTarget.StandaloneOSX;
+#else
+        private static BuildTarget selectedBuildTarget = BuildTarget.NoTarget;
+#endif
         private static string pkLog;
         [MenuItem("Cirilla/工具/资源管理器", false, 61)]
         public static void Open() => GetWindow<Packager>("资源配置表").Show();
@@ -24,11 +34,17 @@ namespace Cirilla.CEditor
             EditorUtil.lazyLoad = !EditorUtil.lazyLoad;
             EditorGUILayout.EndHorizontal();
 
-            EditorGUILayout.HelpBox("选择平台进行资源打包", MessageType.Info);
+            EditorGUILayout.HelpBox("选择平台进行资源打包(版本号生成文件后续可用于热更校验)", MessageType.Info);
             EditorGUILayout.BeginHorizontal();
             EditorGUILayout.LabelField("平台", new[] { GUILayout.Height(20), GUILayout.Width(40) });
             selectedBuildTarget = (BuildTarget)EditorGUILayout.EnumPopup(selectedBuildTarget);
             EditorGUILayout.EndHorizontal();
+
+            EditorGUILayout.BeginHorizontal();
+            int versionValue = EditorGUILayout.IntField(EditorUtil.version);
+            if (EditorUtil.version != versionValue) EditorUtil.version = versionValue;
+            EditorGUILayout.EndHorizontal();
+
             if (selectedBuildTarget == BuildTarget.NoTarget)
                 GUI.enabled = false;
 
@@ -92,16 +108,19 @@ namespace Cirilla.CEditor
                     File.Delete(buildPath + $"/{assetBundleBuild.assetBundleName}.manifest.meta");
                 }
             }
-            
-            File.Delete(buildPath + "/BuildResources");
-            File.Delete(buildPath + "/BuildResources.manifest");
-            File.Delete(buildPath + "/BuildResources.manifest.meta");
-            File.Delete(buildPath + "/BuildResources.meta");
+
+            File.Delete(buildPath + $"/{EditorUtil.buildResourcesFolder}");
+            File.Delete(buildPath + $"/{EditorUtil.buildResourcesFolder}.manifest");
+            File.Delete(buildPath + $"/{EditorUtil.buildResourcesFolder}.manifest.meta");
+            File.Delete(buildPath + $"/{EditorUtil.buildResourcesFolder}.meta");
             File.Delete(assemblyPath + ".meta");
             Directory.Delete(assemblyPath, true);
-            AssetDatabase.Refresh();
             if (pkLog != string.Empty)
                 Debug.Log(pkLog);
+
+            CreateMatchFile(buildPath);
+
+            AssetDatabase.Refresh();
         }
 
         private static void Collect(string path, List<List<AssetBundleBuild>> resBuffer)
@@ -193,7 +212,28 @@ namespace Cirilla.CEditor
             return index;
         }
 
-        public static string GetBundleName(string path)
+        private static void CreateMatchFile(string path)
+        {
+            DirectoryInfo directoryInfo = new DirectoryInfo(path);
+            FileInfo[] fileInfos = directoryInfo.GetFiles();
+
+            string info = EditorUtil.version.ToString() + "\n";
+            for (int i = 0; i < fileInfos.Length; i ++)
+            {
+                if (IgnoreFile(fileInfos[i].Name))
+                    continue;
+
+                FileStream fileStream = fileInfos[i].Open(FileMode.Open);
+                info += $"{fileInfos[i].Name}|{Util.GetMD5(fileStream)}";
+                if (i != fileInfos.Length - 1)
+                    info += "\n";
+                fileStream.Close();
+            }
+
+            EditorUtil.Write(path + $"/{EditorUtil.matchFile}", info);
+        }
+
+        private static string GetBundleName(string path)
         {
             path = path.ToLower().Replace("\\", "/");
 
@@ -210,20 +250,8 @@ namespace Cirilla.CEditor
 
         private static bool IgnoreFile(string file)
         {
-            string[] buffer = file.Split('.');
-
-            if (buffer.Length < 2)
+            if (file.EndsWith(".meta") || file.EndsWith(".cs") || file.EndsWith(".dll"))
                 return true;
-
-            switch (buffer[buffer.Length-1])
-            {
-                case "meta":
-                    return true;
-                case "cs":
-                    return true;
-                case "dll":
-                    return true;
-            }
 
             return false;
         }

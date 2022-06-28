@@ -4,19 +4,8 @@ namespace Cirilla
 {
     public class ASingletonBase<T>
     {
-        private static T ins;
+        public static T instance { get; private set; }
 
-        static ASingletonBase()
-        {
-            ins = (T)Activator.CreateInstance(typeof(T), true);
-        }
-
-        public static T instance
-        {
-            get
-            {
-                return ins;
-            }
-        }
+        static ASingletonBase() => instance = (T)Activator.CreateInstance(typeof(T), true);
     }
 }

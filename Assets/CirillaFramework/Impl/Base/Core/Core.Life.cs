@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
 using UnityEngine;
+using UnityEngine.Networking;
 
 namespace Cirilla
 {
@@ -16,12 +17,22 @@ namespace Cirilla
         public static Action onLogicUpdatePre;
         public static Action onLogicUpdatePost;
 
+        public static Action loadHotBuffer;
+        public static Action loadProcess;
+
         private ConcurrentQueue<MessageInfo> messageQueue;
         private IProcess runningProcess { get; set; }
         private List<IProcess> InitedProcesses;
         private IMVCModule mVCModule;
+
+        private int waitForSetUp;
+        private string streamingResourcePath;
+        private string persistentResourcePath;
+
         private void ProcessesInit()
         {
+            streamingResourcePath = Application.streamingAssetsPath + "/" + Util.buildResourcesFolder;
+            persistentResourcePath = Application.persistentDataPath + "/" + Util.buildResourcesFolder;
             InitedProcesses = new List<IProcess>();
             messageQueue = new ConcurrentQueue<MessageInfo>();
             if (string.IsNullOrEmpty(Util.devPath))
@@ -30,6 +41,125 @@ namespace Cirilla
                 return;
             }
 
+#if !UNITY_EDITOR && (UNITY_ANDROID || UNITY_IOS)
+            if(Util.lazyLoad)
+            {
+                LoadProcesses();
+                return;
+            }
+            loadProcess = LoadProcesses;
+            MatchStreamingAssetToPersistent();
+#else
+            LoadProcesses();
+#endif
+        }
+
+        private void MatchStreamingAssetToPersistent()
+        {
+            StartCoroutine(WWWDownLoad(streamingResourcePath + "/" + Util.matchFile, (bytes) =>
+            {
+                if (bytes == null)
+                {
+                    CiriDebugger.LogError("加载失败:缺少版本文件");
+                    return;
+                }
+                Stream stream = new MemoryStream(bytes);
+                StreamReader streamReader = new StreamReader(stream);
+                string[] lines = streamReader.ReadToEnd().Split('\n');
+                streamReader.Close();
+                stream.Close();
+                SetUpBaseRes(lines, bytes);
+                Action check = null;
+                check = () =>
+                {
+                    if (waitForSetUp > 0)
+                        return;
+
+                    GC.Collect();
+                    loadHotBuffer?.Invoke();
+                    onLogicUpdatePost -= check;
+                };
+                onLogicUpdatePost += check;
+            }));
+        }
+
+        private void SetUpBaseRes(string[] lines, byte[] bytes)
+        {
+            Dictionary<string, ResMatchInfo> baseMatchInfos = new Dictionary<string, ResMatchInfo>();
+            for(int i = 1; i < lines.Length; i ++)
+            {
+                if (string.IsNullOrEmpty(lines[i]))
+                    continue;
+                string[] info = lines[i].Split('|');
+                baseMatchInfos.Add(info[0], new ResMatchInfo(info[0], info[1]));
+            }
+
+            string persisMatchFile = persistentResourcePath + "/" + Util.matchFile;
+            if (!File.Exists(persisMatchFile))
+            {
+                Directory.CreateDirectory(persistentResourcePath);
+                File.WriteAllBytes($"{persistentResourcePath}/{Util.matchFile}", bytes);
+                foreach (ResMatchInfo resMatchInfo in baseMatchInfos.Values)
+                {
+                    waitForSetUp++;
+                    StartCoroutine(WWWDownLoad($"{streamingResourcePath}/{resMatchInfo.file}", (bytes) =>
+                    {
+                        File.WriteAllBytes($"{persistentResourcePath}/{resMatchInfo.file}", bytes);
+                        waitForSetUp --;
+                    }));
+                }
+                return;
+            }
+
+            StreamReader streamReader = new StreamReader(persisMatchFile);
+            string[] persisInfos = streamReader.ReadToEnd().Split('\n');
+            streamReader.Close();
+
+            Dictionary<string, ResMatchInfo> persisMatchInfos = new Dictionary<string, ResMatchInfo>();
+            for (int i = 1; i < persisInfos.Length; i++)
+            {
+                if (string.IsNullOrEmpty(persisInfos[i]))
+                    continue;
+                string[] info = persisInfos[i].Split('|');
+                persisMatchInfos.Add(info[0], new ResMatchInfo(info[0], info[1]));
+            }
+
+            int version = int.Parse(persisInfos[0]);
+            int baseVer = int.Parse(lines[0]);
+
+            if (baseVer > version)
+            {
+                File.WriteAllBytes($"{persistentResourcePath}/{Util.matchFile}", bytes);
+                foreach (KeyValuePair<string, ResMatchInfo> kv in baseMatchInfos)
+                {
+                    waitForSetUp ++;
+                    StartCoroutine(WWWDownLoad($"{streamingResourcePath}/{kv.Key}", (bytes) =>
+                    {
+                        File.WriteAllBytes($"{persistentResourcePath}/{kv.Key}", bytes);
+                        waitForSetUp --;
+                    }));
+                }
+                return;
+            }
+
+            foreach (KeyValuePair<string, ResMatchInfo> kv in baseMatchInfos)
+            {
+                if (!File.Exists($"{persistentResourcePath}/{kv.Key}"))
+                {
+                    waitForSetUp ++;
+                    StartCoroutine(WWWDownLoad(streamingResourcePath + "/" + kv.Key, (bytes) =>
+                    {
+                        File.WriteAllBytes($"{persistentResourcePath}/{kv.Key}", bytes);
+                        waitForSetUp --;
+                    }));
+                    continue;
+                }
+            }
+        }
+
+        private void LoadProcesses()
+        {
+            loadProcess = null;
             string assemblyName = Util.devPath.Substring("Assets/".Length);
 #if UNITY_EDITOR
             string dllPath = Environment.CurrentDirectory.Replace("\\", "/") + $"/Library/ScriptAssemblies/{Util.devPath.Substring("Assets/".Length)}.dll";
@@ -47,7 +177,7 @@ namespace Cirilla
                 return;
 
             Assembly assembly = Assembly.Load(dllBytes);
-            Type type = assembly.GetType(assemblyName+".ProcessType");
+            Type type = assembly.GetType(assemblyName + ".ProcessType");
 
             if (type == null)
             {
@@ -146,6 +276,22 @@ namespace Cirilla
         {
             yield return new WaitForSeconds(time);
             callBack();
+        }
+
+        private IEnumerator WWWDownLoad(string url, Action<byte[]> callBack)
+        {
+            UnityWebRequest unityWebRequest = UnityWebRequest.Get(url);
+            yield return unityWebRequest.SendWebRequest();
+
+            if (unityWebRequest.result == UnityWebRequest.Result.ConnectionError)
+            {
+                callBack?.Invoke(null);
+                yield break;
+            }
+
+            byte[] bytes = unityWebRequest.downloadHandler.data;
+
+            callBack?.Invoke(bytes.Length > 0 ? bytes : null);
         }
     }
 }

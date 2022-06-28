@@ -166,6 +166,25 @@ namespace Cirilla.CEditor
             }
         }
 
+        public static string matchFile
+        {
+            get
+            {
+                DevConfig devConfig = LoadAssetFromResources<DevConfig>(DevConfigAssetPath);
+                string file = devConfig.matchFile;
+                UnLoadAsset(devConfig);
+                return file != string.Empty ? file : (buildResourcesFolder = "version");
+            }
+
+            set
+            {
+                DevConfig devConfig = LoadAssetFromResources<DevConfig>(DevConfigAssetPath);
+                devConfig.matchFile = value;
+                SaveAsset(devConfig);
+                UnLoadAsset(devConfig);
+            }
+        }
+
         public static string preLoadExt
         {
             get
@@ -238,6 +257,25 @@ namespace Cirilla.CEditor
             {
                 DevConfig devConfig = LoadAssetFromResources<DevConfig>(DevConfigAssetPath);
                 devConfig.lazyLoad = value;
+                SaveAsset(devConfig);
+                UnLoadAsset(devConfig);
+            }
+        }
+
+        public static int version
+        {
+            get
+            {
+                DevConfig devConfig = LoadAssetFromResources<DevConfig>(DevConfigAssetPath);
+                int value = devConfig.baseVersion;
+                UnLoadAsset(devConfig);
+                return value;
+            }
+
+            set
+            {
+                DevConfig devConfig = LoadAssetFromResources<DevConfig>(DevConfigAssetPath);
+                devConfig.baseVersion = value;
                 SaveAsset(devConfig);
                 UnLoadAsset(devConfig);
             }

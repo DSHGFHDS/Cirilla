@@ -4,6 +4,7 @@
 	<assembly fullname="System.Memory" preserve="all" />
 	<assembly fullname="System.Runtime.CompilerServices.Unsafe" preserve="all" />
 	<assembly fullname="CirillaFramework" preserve="all" />
+	<assembly fullname="HotBuffer" preserve="all" />
 	<assembly fullname="Unity.ThirdParty" preserve="all" />
 	<assembly fullname="System" preserve="all" />
 	<assembly fullname="UnityEngine" preserve="all" />
