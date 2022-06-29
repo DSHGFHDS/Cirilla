@@ -25,14 +25,10 @@ namespace Cirilla
         private List<IProcess> InitedProcesses;
         private IMVCModule mVCModule;
 
-        private int waitForSetUp;
-        private string streamingResourcePath;
-        private string persistentResourcePath;
+
 
         private void ProcessesInit()
         {
-            streamingResourcePath = Application.streamingAssetsPath + "/" + Util.buildResourcesFolder;
-            persistentResourcePath = Application.persistentDataPath + "/" + Util.buildResourcesFolder;
             InitedProcesses = new List<IProcess>();
             messageQueue = new ConcurrentQueue<MessageInfo>();
             if (string.IsNullOrEmpty(Util.devPath))
@@ -41,19 +37,28 @@ namespace Cirilla
                 return;
             }
 
+            loadProcess = LoadProcesses;
 #if !UNITY_EDITOR && (UNITY_ANDROID || UNITY_IOS)
+
+            streamingResourcePath = Application.streamingAssetsPath + "/" + Util.buildResourcesFolder;
+            persistentResourcePath = Application.persistentDataPath + "/" + Util.buildResourcesFolder;
+
             if(Util.lazyLoad)
             {
                 LoadProcesses();
                 return;
             }
-            loadProcess = LoadProcesses;
+
             MatchStreamingAssetToPersistent();
 #else
-            loadProcess = LoadProcesses;
             loadHotBuffer?.Invoke();
+            loadHotBuffer = null;
 #endif
         }
+#if !UNITY_EDITOR && (UNITY_ANDROID || UNITY_IOS)
+        private int waitForSetUp;
+        private string streamingResourcePath;
+        private string persistentResourcePath;
 
         private void MatchStreamingAssetToPersistent()
         {
@@ -78,6 +83,7 @@ namespace Cirilla
 
                     GC.Collect();
                     loadHotBuffer?.Invoke();
+                    loadHotBuffer = null;
                     onLogicUpdatePost -= check;
                 };
                 onLogicUpdatePost += check;
@@ -157,7 +163,7 @@ namespace Cirilla
                 }
             }
         }
-
+#endif
         private void LoadProcesses()
         {
             loadProcess = null;
