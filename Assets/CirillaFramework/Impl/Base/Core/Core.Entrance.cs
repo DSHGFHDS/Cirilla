@@ -38,6 +38,7 @@ namespace Cirilla
             containerIns.Register<ICSVModule, CSVModule>();
             containerIns.Register<IGoPoolModule, GoPoolModule>();
             containerIns.Register<IAudioModule, AudioModule>();
+            containerIns.Resolve<IResModule>();
         }
     }
 }
