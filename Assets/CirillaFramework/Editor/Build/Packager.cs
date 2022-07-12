@@ -152,6 +152,9 @@ namespace Cirilla.CEditor
                 if (!items.Contains(asset))
                     items.Add(asset);
 
+                if (file.EndsWith(".unity"))
+                    continue;
+
                 string[] dependences = AssetDatabase.GetDependencies(asset, true);
                 foreach (string dependence in dependences)
                 {
