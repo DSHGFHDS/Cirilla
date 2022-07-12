@@ -68,7 +68,6 @@ namespace Cirilla.CEditor
         {
             pkLog = string.Empty;
             List<List<AssetBundleBuild>> resBuffer = new List<List<AssetBundleBuild>>();
-            resBuffer.Add(new List<AssetBundleBuild>());
 
             string assemblyName = EditorUtil.devPath.Substring("Assets/".Length);
             string path;
@@ -141,7 +140,6 @@ namespace Cirilla.CEditor
             if (fileInfos.Length <= 0)
                 return;
 
-            int index = 0;
             List<string> items = new List<string>();
             foreach (FileInfo fileInfo in fileInfos)
             {
@@ -152,10 +150,7 @@ namespace Cirilla.CEditor
                 string asset = "Assets" + file.Substring(Application.dataPath.Length).Replace('\\', '/');
 
                 if (!items.Contains(asset))
-                {
-                    index = CheckSigned(asset, resBuffer);
                     items.Add(asset);
-                }
 
                 string[] dependences = AssetDatabase.GetDependencies(asset, true);
                 foreach (string dependence in dependences)
@@ -166,7 +161,6 @@ namespace Cirilla.CEditor
                     if (items.Contains(dependence))
                         continue;
 
-                    index = CheckSigned(dependence, resBuffer);
                     items.Add(dependence);
                 }
             }
@@ -174,42 +168,46 @@ namespace Cirilla.CEditor
             if (items.Count <= 0)
                 return;
 
-            AssetBundleBuild assetBundleBuild = new AssetBundleBuild();
-            assetBundleBuild.assetBundleName = path.EndsWith(EditorUtil.rawResourceFolder) ? EditorUtil.abRoot + EditorUtil.preLoadExt + EditorUtil.abExtension : GetBundleName(path);
-            assetBundleBuild.assetNames = items.ToArray();
+            AssetBundleBuild resultBuild = new AssetBundleBuild();
+            resultBuild.assetBundleName = path.EndsWith(EditorUtil.rawResourceFolder) ? EditorUtil.abRoot + EditorUtil.preLoadExt + EditorUtil.abExtension : GetBundleName(path);
+            resultBuild.assetNames = items.ToArray();
 
             if (!path.EndsWith(EditorUtil.rawResourceFolder))
-                pkLog += assetBundleBuild.assetBundleName + "(<color=#FF6EC7>" + path.Split(new[] { EditorUtil.rawResourceFolder + "\\" }, StringSplitOptions.None)[1] + "</color>)\n";
+                pkLog += resultBuild.assetBundleName + "(<color=#FF6EC7>" + path.Split(new[] { EditorUtil.rawResourceFolder + "\\" }, StringSplitOptions.None)[1] + "</color>)\n";
 
-            if (index == -1)
+            foreach(List<AssetBundleBuild> assetBundleBuilds in resBuffer)
             {
-                resBuffer.Add(new List<AssetBundleBuild>() { assetBundleBuild });
-                return;
-            }
-
-            resBuffer[index].Add(assetBundleBuild);
-        }
-
-        private static int CheckSigned(string checkName, List<List<AssetBundleBuild>> resBuffer)
-        {
-            int index = 0;
-        ReCheck:
-            if (index >= resBuffer.Count)
-                return -1;
-
-            foreach (AssetBundleBuild assetBundleBuild in resBuffer[index])
-            {
-                foreach (string assetName in assetBundleBuild.assetNames)
+                for(int i = 0; i < assetBundleBuilds.Count; i ++)
                 {
-                    if (checkName != assetName)
-                        continue;
+                    if (!assetsContains(resultBuild.assetNames, assetBundleBuilds[i].assetNames))
+                    {
+                        if (i != assetBundleBuilds.Count - 1)
+                            continue;
 
-                    index ++;
-                    goto ReCheck;
+                        assetBundleBuilds.Add(resultBuild);
+                        return;
+                    }
+                    break;
                 }
             }
 
-            return index;
+            resBuffer.Add(new List<AssetBundleBuild> { resultBuild });
+        }
+
+        private static bool assetsContains(string[] originAssetNames, string[] targetAssetNames)
+        {
+            foreach(string ori in originAssetNames)
+            {
+                foreach(string target in targetAssetNames)
+                {
+                    if (ori != target)
+                        continue;
+
+                    return true;
+                }
+            }
+
+            return false;
         }
 
         private static void CreateMatchFile(string path)
