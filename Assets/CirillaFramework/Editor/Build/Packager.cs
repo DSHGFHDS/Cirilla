@@ -64,11 +64,46 @@ namespace Cirilla.CEditor
             }
         }
 
+        public static void Collect(string path, Dictionary<string, List<string>> rawResources)
+        {
+            if (path.ToLower().EndsWith(EditorUtil.baseSourceExt))
+                return;
+
+            PickResources(path, rawResources);
+            string[] directories = Directory.GetDirectories(path);
+            foreach (string directory in directories)
+                Collect(directory, rawResources);
+        }
+
+        public static void PickResources(string path, Dictionary<string, List<string>> rawResources)
+        {
+            DirectoryInfo directoryInfo = new DirectoryInfo(path);
+            FileInfo[] fileInfos = directoryInfo.GetFiles();
+            if (fileInfos.Length <= 0)
+                return;
+
+            string sealedPath = path.EndsWith(EditorUtil.rawResourceFolder) ? EditorUtil.abRoot + EditorUtil.preLoadExt + EditorUtil.abExtension : GetBundleName(path);
+            List<string> items = new List<string>();
+            foreach (FileInfo fileInfo in fileInfos)
+            {
+                string file = fileInfo.FullName;
+                if (IgnoreFile(file))
+                    continue;
+
+                string asset = "Assets" + file.Substring(Application.dataPath.Length).Replace('\\', '/');
+                items.Add(asset);
+            }
+
+            if (items.Count <= 0)
+                return;
+
+            rawResources.Add(sealedPath, items);
+            if (!path.EndsWith(EditorUtil.rawResourceFolder))
+                pkLog += sealedPath + "(<color=#FF6EC7>" + path.Split(new[] { EditorUtil.rawResourceFolder + "\\" }, StringSplitOptions.None)[1] + "</color>)\n";
+        }
+
         public static void Packgae(BuildTarget buildTarget)
         {
-            pkLog = string.Empty;
-            List<List<AssetBundleBuild>> resBuffer = new List<List<AssetBundleBuild>>();
-
             string assemblyName = EditorUtil.devPath.Substring("Assets/".Length);
             string path;
             if (EditorUtil.devPath == string.Empty || !Directory.Exists(path = Application.dataPath + "/" + assemblyName + "/" + EditorUtil.rawResourceFolder))
@@ -91,23 +126,31 @@ namespace Cirilla.CEditor
             File.WriteAllBytes($"{assemblyPath}/{assemblyName}.bytes", File.ReadAllBytes(compilationTemp + $"/{assemblyName}.dll"));
             Directory.Delete(compilationTemp, true);
             AssetDatabase.Refresh();
-            Collect(path, resBuffer);
+
+            Dictionary<string, List<string>> rawResources = new Dictionary<string, List<string>>();
+            Collect(path, rawResources);
 
             string buildPath = Application.streamingAssetsPath + $"/{EditorUtil.buildResourcesFolder}";
             if (Directory.Exists(buildPath))
                 Directory.Delete(buildPath, true);
 
             Directory.CreateDirectory(buildPath);
-            foreach (List<AssetBundleBuild> assetBundleBuilds in resBuffer)
-            {
-                BuildPipeline.BuildAssetBundles(buildPath, assetBundleBuilds.ToArray(), BuildAssetBundleOptions.ChunkBasedCompression, buildTarget);
-                foreach (AssetBundleBuild assetBundleBuild in assetBundleBuilds)
-                {
-                    File.Delete(buildPath + $"/{assetBundleBuild.assetBundleName}.manifest");
-                    File.Delete(buildPath + $"/{assetBundleBuild.assetBundleName}.manifest.meta");
-                }
-            }
 
+            AssetBundleBuild[] assetBundleBuilds = new AssetBundleBuild[rawResources.Count];
+            int i = 0;
+            foreach (KeyValuePair<string, List<string>> kv in rawResources)
+            {
+                assetBundleBuilds[i] = new AssetBundleBuild();
+                assetBundleBuilds[i].assetBundleName = kv.Key;
+                assetBundleBuilds[i].assetNames = kv.Value.ToArray();
+                i ++;
+            }
+            BuildPipeline.BuildAssetBundles(buildPath, assetBundleBuilds, BuildAssetBundleOptions.ChunkBasedCompression, buildTarget);
+            foreach (AssetBundleBuild assetBundleBuild in assetBundleBuilds)
+            {
+                File.Delete(buildPath + $"/{assetBundleBuild.assetBundleName}.manifest");
+                File.Delete(buildPath + $"/{assetBundleBuild.assetBundleName}.manifest.meta");
+            }
             File.Delete(buildPath + $"/{EditorUtil.buildResourcesFolder}");
             File.Delete(buildPath + $"/{EditorUtil.buildResourcesFolder}.manifest");
             File.Delete(buildPath + $"/{EditorUtil.buildResourcesFolder}.manifest.meta");
@@ -116,103 +159,12 @@ namespace Cirilla.CEditor
             Directory.Delete(assemblyPath, true);
             if (pkLog != string.Empty)
                 Debug.Log(pkLog);
-
+            
             CreateMatchFile(buildPath);
 
             AssetDatabase.Refresh();
         }
-
-        private static void Collect(string path, List<List<AssetBundleBuild>> resBuffer)
-        {
-            if (path.ToLower().EndsWith(EditorUtil.baseSourceExt))
-                return;
-
-            PickResources(path, resBuffer);
-            string[] directories = Directory.GetDirectories(path);
-            foreach (string directory in directories)
-                Collect(directory, resBuffer);
-        }
-
-        private static void PickResources(string path, List<List<AssetBundleBuild>> resBuffer)
-        {
-            DirectoryInfo directoryInfo = new DirectoryInfo(path);
-            FileInfo[] fileInfos = directoryInfo.GetFiles();
-            if (fileInfos.Length <= 0)
-                return;
-
-            List<string> items = new List<string>();
-            foreach (FileInfo fileInfo in fileInfos)
-            {
-                string file = fileInfo.FullName;
-                if (IgnoreFile(file))
-                    continue;
-
-                string asset = "Assets" + file.Substring(Application.dataPath.Length).Replace('\\', '/');
-
-                if (!items.Contains(asset))
-                    items.Add(asset);
-
-                if (file.EndsWith(".unity"))
-                    continue;
-
-                string[] dependences = AssetDatabase.GetDependencies(asset, true);
-                foreach (string dependence in dependences)
-                {
-                    if (IgnoreFile(dependence) || asset == dependence)
-                        continue;
-
-                    if (items.Contains(dependence))
-                        continue;
-
-                    items.Add(dependence);
-                }
-            }
-
-            if (items.Count <= 0)
-                return;
-
-            AssetBundleBuild resultBuild = new AssetBundleBuild();
-            resultBuild.assetBundleName = path.EndsWith(EditorUtil.rawResourceFolder) ? EditorUtil.abRoot + EditorUtil.preLoadExt + EditorUtil.abExtension : GetBundleName(path);
-            resultBuild.assetNames = items.ToArray();
-
-            if (!path.EndsWith(EditorUtil.rawResourceFolder))
-                pkLog += resultBuild.assetBundleName + "(<color=#FF6EC7>" + path.Split(new[] { EditorUtil.rawResourceFolder + "\\" }, StringSplitOptions.None)[1] + "</color>)\n";
-
-            foreach(List<AssetBundleBuild> assetBundleBuilds in resBuffer)
-            {
-                for(int i = 0; i < assetBundleBuilds.Count; i ++)
-                {
-                    if (!assetsContains(resultBuild.assetNames, assetBundleBuilds[i].assetNames))
-                    {
-                        if (i != assetBundleBuilds.Count - 1)
-                            continue;
-
-                        assetBundleBuilds.Add(resultBuild);
-                        return;
-                    }
-                    break;
-                }
-            }
-
-            resBuffer.Add(new List<AssetBundleBuild> { resultBuild });
-        }
-
-        private static bool assetsContains(string[] originAssetNames, string[] targetAssetNames)
-        {
-            foreach(string ori in originAssetNames)
-            {
-                foreach(string target in targetAssetNames)
-                {
-                    if (ori != target)
-                        continue;
-
-                    return true;
-                }
-            }
-
-            return false;
-        }
-
+        
         private static void CreateMatchFile(string path)
         {
             DirectoryInfo directoryInfo = new DirectoryInfo(path);

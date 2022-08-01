@@ -1,5 +1,6 @@
 using Cirilla;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 namespace GameLogic
 {
@@ -18,7 +19,6 @@ namespace GameLogic
 
         public override void OnEnter(params object[] args)
         {
-
         }
 
         public override void OnExit()
